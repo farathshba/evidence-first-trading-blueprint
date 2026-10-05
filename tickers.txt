@@ -1,0 +1,10 @@
+# Your market universe - one Yahoo Finance ticker per line. # lines are ignored.
+# SGX ends .SI, Indonesia .JK, Australia .AX, US no suffix.
+# Replace these examples with your own list (50-600 tickers):
+C6L.SI
+D05.SI
+E28.SI
+U11.SI
+O39.SI
+S58.SI
+Z74.SI
