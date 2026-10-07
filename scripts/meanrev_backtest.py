@@ -14,6 +14,8 @@ ap.add_argument("--min-price", type=float, default=0.20)
 ap.add_argument("--min-dollar-vol", type=float, default=200_000)
 ap.add_argument("--capital", type=float, default=100_000)
 ap.add_argument("--cost-pct", type=float, default=0.35)
+ap.add_argument("--entry-start", default=None, help="YYYY-MM-DD: earliest entry date (walk-forward)")
+ap.add_argument("--entry-end", default=None, help="YYYY-MM-DD: latest entry date (walk-forward)")
 a = ap.parse_args()
 cost = a.cost_pct / 100.0
 
@@ -60,7 +62,11 @@ for d in all_dates:
             if t in holdings or d not in b.index: continue
             row = b.loc[d]
             if not (row["close"] > 0 and row["close"] > row["sma200"] and pd.notna(row["sma200"])): continue
-            if row["r3"] <= -a.dip and row["close"] >= a.min_price and row["dvol"] >= a.min_dollar_vol:
+            rd = str(row.get("date", row.name))[:10]
+            _in_win = True
+            if a.entry_start: _in_win = _in_win and (rd >= a.entry_start)
+            if a.entry_end:   _in_win = _in_win and (rd <= a.entry_end)
+            if _in_win and row["r3"] <= -a.dip and row["close"] >= a.min_price and row["dvol"] >= a.min_dollar_vol:
                 cands.append((t, row["r3"]))
         cands.sort(key=lambda x: x[1])  # deepest dip first
         stake = cash / (a.max_slots - len(holdings))
