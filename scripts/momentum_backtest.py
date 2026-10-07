@@ -14,6 +14,9 @@ ap.add_argument("--min-dollar-vol", type=float, default=1_000_000, help="avg dai
 ap.add_argument("--capital", type=float, default=100_000)
 ap.add_argument("--cost-pct", type=float, default=0.35, help="cost per side, %% of notional")
 ap.add_argument("--regime-gate", type=int, default=1, help="1 = only hold when ES3 above SMA200")
+ap.add_argument("--skip", type=int, default=0, help="skip-window: exclude the most recent N days from the ranking return (2.1)")
+ap.add_argument("--entry-start", default=None, help="YYYY-MM-DD: earliest entry date (walk-forward)")
+ap.add_argument("--entry-end", default=None, help="YYYY-MM-DD: latest entry date (walk-forward)")
 a = ap.parse_args()
 cost = a.cost_pct / 100.0
 
@@ -73,8 +76,8 @@ for d in all_dates:
     for t, b in books.items():
         if d not in b.index: continue
         i = b.index.get_loc(d)
-        if i < a.lookback + 21: continue
-        px = b["close"].iloc[i]; past = b["close"].iloc[i - a.lookback]
+        if i < a.lookback + a.skip + 21: continue
+        px = b["close"].iloc[i]; past = b["close"].iloc[i - a.lookback - a.skip]
         dvol = (b["close"] * b["volume"]).iloc[i-20:i].mean()
         if px >= a.min_price and dvol >= a.min_dollar_vol and past > 0:
             scores.append((t, px / past - 1))
@@ -86,7 +89,10 @@ for d in all_dates:
             px = holdings[t]["last"]; proc = px * holdings[t]["shares"] * (1 - cost)
             trades.append(dict(ticker=t, entry_date=holdings[t]["edate"], exit_date=d, entry=holdings[t]["entry"], exit=px, pnl=proc - holdings[t]["basis"], ret_pct=100*(proc-holdings[t]["basis"])/holdings[t]["basis"]))
             cash += proc; del holdings[t]
-    stake = cash / max(len(target - set(holdings)), 1)
+    _d_ok = True
+    if a.entry_start and d < a.entry_start: _d_ok = False
+    if a.entry_end and d > a.entry_end: _d_ok = False
+    stake = cash / max(len(target - set(holdings)), 1) if _d_ok else 0
     for t in sorted(target - set(holdings)):
         px = books[t].loc[d, "close"]
         sh = int(stake // px)
