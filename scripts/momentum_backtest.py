@@ -15,6 +15,8 @@ ap.add_argument("--capital", type=float, default=100_000)
 ap.add_argument("--cost-pct", type=float, default=0.35, help="cost per side, %% of notional")
 ap.add_argument("--regime-gate", type=int, default=1, help="1 = only hold when ES3 above SMA200")
 ap.add_argument("--skip", type=int, default=0, help="skip-window: exclude the most recent N days from the ranking return (2.1)")
+ap.add_argument("--vol-adj", type=int, default=0, help="vol-adjust: ranking window for realized sigma; score = ret/sigma (2.2; 0=off)")
+ap.add_argument("--breadth", type=int, default=0, help="breadth gate: min %% of universe above own SMA200 required for entries (2.3; 0=off)")
 ap.add_argument("--entry-start", default=None, help="YYYY-MM-DD: earliest entry date (walk-forward)")
 ap.add_argument("--entry-end", default=None, help="YYYY-MM-DD: latest entry date (walk-forward)")
 a = ap.parse_args()
@@ -80,7 +82,12 @@ for d in all_dates:
         px = b["close"].iloc[i]; past = b["close"].iloc[i - a.lookback - a.skip]
         dvol = (b["close"] * b["volume"]).iloc[i-20:i].mean()
         if px >= a.min_price and dvol >= a.min_dollar_vol and past > 0:
-            scores.append((t, px / past - 1))
+            ret = px / past - 1
+            if a.vol_adj:
+                sig = b["close"].iloc[i - a.vol_adj:i].pct_change().std()
+                scores.append((t, ret / sig if sig and sig > 0 else -9e9))
+            else:
+                scores.append((t, ret))
     scores.sort(key=lambda x: -x[1])
     target = set(t for t, _ in scores[:a.top_n])
     # sell non-targets, then buy targets with equal weight
@@ -92,6 +99,17 @@ for d in all_dates:
     _d_ok = True
     if a.entry_start and d < a.entry_start: _d_ok = False
     if a.entry_end and d > a.entry_end: _d_ok = False
+    if a.breadth:
+        _above = 0; _n = 0
+        for t2, b2 in books.items():
+            if d in b2.index:
+                i2 = b2.index.get_loc(d)
+                if i2 >= 200:
+                    _n += 1
+                    if b2["close"].iloc[i2] >= b2["close"].iloc[i2-199:i2+1].mean():
+                        _above += 1
+        if _n > 0 and (100 * _above / _n) < a.breadth:
+            _d_ok = False
     stake = cash / max(len(target - set(holdings)), 1) if _d_ok else 0
     for t in sorted(target - set(holdings)):
         px = books[t].loc[d, "close"]
