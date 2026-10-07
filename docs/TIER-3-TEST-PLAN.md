@@ -31,6 +31,19 @@ Measure real bid-ask spreads on the names the champion's top-10 *actually held*:
 ### 1.2 Champion re-validation at revised costs
 One run with revised `--cost-pct`. **Pre-registered:** EV < +0.6% -> champion downgrades to provisional; this becomes the project's central problem.
 
+### 1.3 Sizing-integrity audit (Reddit critique, 8 Oct 2026)
+Forensic check on the champion's backtest, not a new strategy run:
+- Verify position sizing is period-invariant: no equity-curve dependence, no implicit caps that bite only in bad years
+- Examine the >10-candidates slot tie-break for hidden state-dependence (does which-10-gets-picked change behavior in crowded markets?)
+- Method: code audit + assertion test (same inputs -> identical sizing regardless of period)
+
+### 1.4 Edge-stability decomposition (Reddit critique, 8 Oct 2026)
+- Champion win rate and EV decomposed by year and by half
+- Profit-concentration analysis: what % of total profit came from the top-N trades?
+- Distinguishes "consistently thin edge" from "carried by two big years"
+- Must run BEFORE Phase 2 variants — its output determines how variant results are interpreted
+
+
 ---
 
 ## Phase 2 — Champion variants (one parameter change per test, both stages)
@@ -67,7 +80,7 @@ One run with revised `--cost-pct`. **Pre-registered:** EV < +0.6% -> champion do
 
 ## Sequencing
 
-1.1 spread audit -> 1.2 champion re-run -> 2.1 -> 2.2 -> 2.3 -> 2.4 -> 2.6 -> 2.5 (parallel anytime) -> 3.1 -> 3.2 -> 3.4 (data permitting) -> 4.1-4.3. Phase 2/3 runs use revised costs from 1.2.
+1.1 spread audit -> 1.2 champion re-run -> 1.3 sizing audit -> 1.4 edge decomposition -> 2.1 -> 2.2 -> 2.3 -> 2.4 -> 2.6 -> 2.5 (parallel anytime) -> 3.1 -> 3.2 -> 3.4 (data permitting) -> 4.1-4.3. Phase 2/3 runs use revised costs from 1.2.
 
 ---
 
@@ -93,6 +106,8 @@ Cloud/serverless migration; relational-DB replacement of the snapshot log; repla
 |---|---|---|---|---|---|
 | 1.1 Spread audit | — | — | pending | | |
 | 1.2 Champion @ revised costs | — | — | pending | | |
+| 1.3 Sizing-integrity audit | — | — | pending | | |
+| 1.4 Edge-stability decomposition | — | — | pending | | |
 | 2.1 Skip window | — | — | pending | | |
 | 2.2 Vol-adjusted (30d/60d) | — | — | pending | | |
 | 2.3 Breadth gate | — | — | pending | | |
