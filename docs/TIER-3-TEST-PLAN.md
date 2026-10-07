@@ -108,7 +108,7 @@ Cloud/serverless migration; relational-DB replacement of the snapshot log; repla
 | 1.2 Champion @ revised costs | PASS | pending (Phase 2) | CHAMPION SURVIVES | 8 Oct 2026 | Worst-case 1.20% rt: EV +0.74%, 6/10 yrs. Mid-case 0.90% rt: EV +1.04%, 6/10 yrs. Gemini friction-artifact claim refuted by measurement. New default cost: 0.45%/side. Caveat: thin margin; edge remains regime-dependent per 1.4. |
 | 1.3 Sizing-integrity audit | PASS | — | PASS | 8 Oct 2026 | stake P&L-blind, runs deterministic, tie-break stateless; quirks documented; silent gate-off bug fixed (fails closed) |
 | 1.4 Edge-stability decomposition | — | — | CONCENTRATED/FRAGILE | 8 Oct 2026 | Top-1 trade = 43% of net profit; top-10 = 229.7% (other 312 net negative); 2022-24 all losing years; all profit from 2025-H2/2026-H1 regime. Edge is regime-dependent, not distributed. |
-| 2.1 Skip window | — | — | pending | | |
+| 2.1 Skip window | FAIL | FAIL | REJECTED | 8 Oct 2026 | Stage 1: ~5/10 yrs positive (< 6 bar); 2021 flips +6,991 -> -13,333. IS EV collapses to +0.28%; OOS EV +1.25% but 2/5 yrs (< 4 bar). Finding: SGX small-cap momentum lacks short-term reversal noise; the fresh-month return IS part of the edge. Raw 126d window confirmed correct. |
 | 2.2 Vol-adjusted (30d/60d) | — | — | pending | | |
 | 2.3 Breadth gate | — | — | pending | | |
 | 2.4 Trailing exit | — | — | pending | | |

@@ -123,6 +123,10 @@ if not td.empty:
 print("\nBAR: EV > +0.6%/trade after costs AND net positive in >= 6 of 10 years.")
 import os
 os.makedirs("results", exist_ok=True)
-out_csv = f"results/champion_trades_{a.lookback}d_top{a.top_n}_cost{a.cost_pct}.csv"
+_tag = f"skip{a.skip}" if a.skip else "raw"
+_win = ""
+if a.entry_start or a.entry_end:
+    _win = f"_{a.entry_start or 'start'}_{a.entry_end or 'end'}"
+out_csv = f"results/champion_trades_{a.lookback}d_top{a.top_n}_cost{a.cost_pct}_{_tag}{_win}.csv"
 td.to_csv(out_csv, index=False)
 print(f"Trades log -> {out_csv}")
