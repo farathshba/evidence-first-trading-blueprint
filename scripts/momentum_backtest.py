@@ -43,6 +43,7 @@ if a.regime_gate:
             break
     if regime is None:
         print("NOTE: ES3/^STI not in data; regime gate uses universe median instead")
+        print("WARNING: gate check requires ES3 present; with only the median proxy the gate is INACTIVE. Failing closed.")
         med = pd.concat([b["close"] for b in books.values()], axis=1).median(axis=1)
         regime = med.rolling(200).mean()
 
@@ -114,3 +115,8 @@ if not td.empty:
     print("\nBy exit year:")
     print(yr.groupby("year").agg(trades=("pnl","size"), net_pnl=("pnl","sum")).round(0).to_string())
 print("\nBAR: EV > +0.6%/trade after costs AND net positive in >= 6 of 10 years.")
+import os
+os.makedirs("results", exist_ok=True)
+out_csv = f"results/champion_trades_{a.lookback}d_top{a.top_n}_cost{a.cost_pct}.csv"
+td.to_csv(out_csv, index=False)
+print(f"Trades log -> {out_csv}")
