@@ -106,8 +106,8 @@ Cloud/serverless migration; relational-DB replacement of the snapshot log; repla
 |---|---|---|---|---|---|
 | 1.1 Spread audit | — | — | pending | | |
 | 1.2 Champion @ revised costs | — | — | pending | | |
-| 1.3 Sizing-integrity audit | — | — | pending | | |
-| 1.4 Edge-stability decomposition | — | — | pending | | |
+| 1.3 Sizing-integrity audit | PASS | — | PASS | 8 Oct 2026 | stake P&L-blind, runs deterministic, tie-break stateless; quirks documented; silent gate-off bug fixed (fails closed) |
+| 1.4 Edge-stability decomposition | — | — | CONCENTRATED/FRAGILE | 8 Oct 2026 | Top-1 trade = 43% of net profit; top-10 = 229.7% (other 312 net negative); 2022-24 all losing years; all profit from 2025-H2/2026-H1 regime. Edge is regime-dependent, not distributed. |
 | 2.1 Skip window | — | — | pending | | |
 | 2.2 Vol-adjusted (30d/60d) | — | — | pending | | |
 | 2.3 Breadth gate | — | — | pending | | |
