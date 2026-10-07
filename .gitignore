@@ -6,3 +6,5 @@ data/
 .venv/
 data_v2/
 data_v2_clean/
+data_v3/
+data_v3_clean/
