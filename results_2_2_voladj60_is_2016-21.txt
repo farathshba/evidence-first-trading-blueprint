@@ -1,0 +1,24 @@
+WORST 5 NAV DAYS:
+      date           nav      drop
+2020-12-07 102036.766062 -0.041173
+2021-08-17 130945.971994 -0.029320
+2021-08-16 134901.271518 -0.026878
+2019-11-08 102572.778395 -0.026218
+2018-02-22  99380.514450 -0.024398
+
+=== SGX MOMENTUM VERDICT ===
+Capital 100,000 -> 120,315  total: +20.3%  Sharpe: 0.31  maxDD: -14.5%
+Round-trips: 132  win rate: 38.6%  avg: +1.05%
+
+By exit year:
+      trades  net_pnl
+year                 
+2017      19  -6135.0
+2018      29     57.0
+2019      26   8201.0
+2020      12    404.0
+2021      36   9047.0
+2022      10   2662.0
+
+BAR: EV > +0.6%/trade after costs AND net positive in >= 6 of 10 years.
+Trades log -> results/champion_trades_126d_top10_cost0.45_raw_2016-01-01_2021-12-31.csv
