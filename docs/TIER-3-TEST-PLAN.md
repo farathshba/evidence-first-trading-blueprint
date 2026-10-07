@@ -109,7 +109,7 @@ Cloud/serverless migration; relational-DB replacement of the snapshot log; repla
 | 1.3 Sizing-integrity audit | PASS | — | PASS | 8 Oct 2026 | stake P&L-blind, runs deterministic, tie-break stateless; quirks documented; silent gate-off bug fixed (fails closed) |
 | 1.4 Edge-stability decomposition | — | — | CONCENTRATED/FRAGILE | 8 Oct 2026 | Top-1 trade = 43% of net profit; top-10 = 229.7% (other 312 net negative); 2022-24 all losing years; all profit from 2025-H2/2026-H1 regime. Edge is regime-dependent, not distributed. |
 | 2.1 Skip window | FAIL | FAIL | REJECTED | 8 Oct 2026 | Stage 1: ~5/10 yrs positive (< 6 bar); 2021 flips +6,991 -> -13,333. IS EV collapses to +0.28%; OOS EV +1.25% but 2/5 yrs (< 4 bar). Finding: SGX small-cap momentum lacks short-term reversal noise; the fresh-month return IS part of the edge. Raw 126d window confirmed correct. |
-| 2.2 Vol-adjusted (30d/60d) | — | — | pending | | |
+| 2.2 Vol-adjusted (30d/60d) | FAIL | FAIL | REJECTED | 8 Oct 2026 | 30d: EV +0.92% but 5/10 yrs; OOS +0.32% (< bar); 2026 flips negative. 60d: EV +0.42% (< bar); OOS -0.23%. maxDD improved slightly (30d: -33.8% vs -37.6%) but edge destroyed. Finding: high-sigma names ARE the SGX momentum edge; vol-adjustment filters out the payers. |
 | 2.3 Breadth gate | — | — | pending | | |
 | 2.4 Trailing exit | — | — | pending | | |
 | 2.5 Thin-leadership threshold | — | — | pending | | |
