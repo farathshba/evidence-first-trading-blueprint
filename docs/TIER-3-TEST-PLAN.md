@@ -105,7 +105,7 @@ Cloud/serverless migration; relational-DB replacement of the snapshot log; repla
 | Test | Stage 1 | Stage 2 | Verdict | Date | Notes |
 |---|---|---|---|---|---|
 | 1.1 Spread audit | — | — | SPREADS HIGHER THAN MODELED | 8 Oct 2026 | CS effective spread median 0.60% on 66 held names (band: 0.63% sub-S$2, 0.48% above). Modeled 0.35%/side too low; Gemini 1.4% rt claim not confirmed. Honest range: 0.85-1.20% rt. 1.2 tests worst case. |
-| 1.2 Champion @ revised costs | — | — | pending | | |
+| 1.2 Champion @ revised costs | PASS | pending (Phase 2) | CHAMPION SURVIVES | 8 Oct 2026 | Worst-case 1.20% rt: EV +0.74%, 6/10 yrs. Mid-case 0.90% rt: EV +1.04%, 6/10 yrs. Gemini friction-artifact claim refuted by measurement. New default cost: 0.45%/side. Caveat: thin margin; edge remains regime-dependent per 1.4. |
 | 1.3 Sizing-integrity audit | PASS | — | PASS | 8 Oct 2026 | stake P&L-blind, runs deterministic, tie-break stateless; quirks documented; silent gate-off bug fixed (fails closed) |
 | 1.4 Edge-stability decomposition | — | — | CONCENTRATED/FRAGILE | 8 Oct 2026 | Top-1 trade = 43% of net profit; top-10 = 229.7% (other 312 net negative); 2022-24 all losing years; all profit from 2025-H2/2026-H1 regime. Edge is regime-dependent, not distributed. |
 | 2.1 Skip window | — | — | pending | | |
