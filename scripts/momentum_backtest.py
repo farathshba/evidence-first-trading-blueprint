@@ -17,6 +17,7 @@ ap.add_argument("--regime-gate", type=int, default=1, help="1 = only hold when E
 ap.add_argument("--skip", type=int, default=0, help="skip-window: exclude the most recent N days from the ranking return (2.1)")
 ap.add_argument("--vol-adj", type=int, default=0, help="vol-adjust: ranking window for realized sigma; score = ret/sigma (2.2; 0=off)")
 ap.add_argument("--breadth", type=int, default=0, help="breadth gate: min %% of universe above own SMA200 required for entries (2.3; 0=off)")
+ap.add_argument("--trail", type=float, default=0.0, help="trailing exit: exit when close < peak close since entry * (1 - trail) (2.4; 0=off)")
 ap.add_argument("--entry-start", default=None, help="YYYY-MM-DD: earliest entry date (walk-forward)")
 ap.add_argument("--entry-end", default=None, help="YYYY-MM-DD: latest entry date (walk-forward)")
 a = ap.parse_args()
@@ -62,6 +63,16 @@ for d in all_dates:
     for t in holdings: nav += holdings[t]["shares"] * (books[t].loc[d, "close"] if d in books[t].index else holdings[t]["last"])
     for t in list(holdings): holdings[t]["last"] = books[t].loc[d, "close"] if d in books[t].index else holdings[t]["last"]
     equity.append((d, nav))
+    if a.trail:
+        for t in list(holdings):
+            h = holdings[t]
+            if d in books[t].index:
+                _c = books[t].loc[d, "close"]
+                h["peak"] = max(h.get("peak", h["entry"]), _c)
+                if _c < h["peak"] * (1 - a.trail):
+                    proc = _c * h["shares"] * (1 - cost)
+                    trades.append(dict(ticker=t, entry_date=h["edate"], exit_date=d, entry=h["entry"], exit=_c, pnl=proc - h["basis"], ret_pct=100*(proc - h["basis"])/h["basis"]))
+                    cash += proc; del holdings[t]
     if d not in month_ends: continue
     # regime gate
     if a.regime_gate and regime is not None and d in regime.index and pd.notna(regime.loc[d]) and books.get("ES3_SI", books.get("ES3")) is not None:
@@ -118,7 +129,7 @@ for d in all_dates:
         out = sh * px
         if out > cash: continue
         cash -= out
-        holdings[t] = dict(shares=sh, entry=px, edate=d, last=px, basis=out * (1 + cost))
+        holdings[t] = dict(shares=sh, entry=px, edate=d, last=px, peak=px, basis=out * (1 + cost))
 
 nav = cash + sum(h["last"] * h["shares"] for h in holdings.values())
 eq = pd.DataFrame(equity, columns=["date", "nav"])
