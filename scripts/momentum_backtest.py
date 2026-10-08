@@ -18,6 +18,7 @@ ap.add_argument("--skip", type=int, default=0, help="skip-window: exclude the mo
 ap.add_argument("--vol-adj", type=int, default=0, help="vol-adjust: ranking window for realized sigma; score = ret/sigma (2.2; 0=off)")
 ap.add_argument("--breadth", type=int, default=0, help="breadth gate: min %% of universe above own SMA200 required for entries (2.3; 0=off)")
 ap.add_argument("--trail", type=float, default=0.0, help="trailing exit: exit when close < peak close since entry * (1 - trail) (2.4; 0=off)")
+ap.add_argument("--min-lead", type=float, default=0.0, help="thin-leadership: skip entries in months where top momentum score < this %% (2.5; 0=off)")
 ap.add_argument("--entry-start", default=None, help="YYYY-MM-DD: earliest entry date (walk-forward)")
 ap.add_argument("--entry-end", default=None, help="YYYY-MM-DD: latest entry date (walk-forward)")
 a = ap.parse_args()
@@ -100,7 +101,10 @@ for d in all_dates:
             else:
                 scores.append((t, ret))
     scores.sort(key=lambda x: -x[1])
-    target = set(t for t, _ in scores[:a.top_n])
+    if a.min_lead and scores and scores[0][1] * 100 < a.min_lead:
+        target = set()
+    else:
+        target = set(t for t, _ in scores[:a.top_n])
     # sell non-targets, then buy targets with equal weight
     for t in list(holdings):
         if t not in target:
@@ -152,7 +156,7 @@ if not td.empty:
 print("\nBAR: EV > +0.6%/trade after costs AND net positive in >= 6 of 10 years.")
 import os
 os.makedirs("results", exist_ok=True)
-_tag = (f"skip{a.skip}" if a.skip else "") + (f"_voladj{a.vol_adj}" if a.vol_adj else "") + (f"_br{a.breadth}" if a.breadth else "") or "raw"
+_tag = (f"skip{a.skip}" if a.skip else "") + (f"_voladj{a.vol_adj}" if a.vol_adj else "") + (f"_br{a.breadth}" if a.breadth else "") + (f"_tr{a.trail}" if a.trail else "") + (f"_ml{a.min_lead}" if a.min_lead else "") or "raw"
 _win = ""
 if a.entry_start or a.entry_end:
     _win = f"_{a.entry_start or 'start'}_{a.entry_end or 'end'}"
