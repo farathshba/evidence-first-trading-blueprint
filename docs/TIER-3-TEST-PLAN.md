@@ -111,9 +111,9 @@ Cloud/serverless migration; relational-DB replacement of the snapshot log; repla
 | 2.1 Skip window | FAIL | FAIL | REJECTED | 8 Oct 2026 | Stage 1: ~5/10 yrs positive (< 6 bar); 2021 flips +6,991 -> -13,333. IS EV collapses to +0.28%; OOS EV +1.25% but 2/5 yrs (< 4 bar). Finding: SGX small-cap momentum lacks short-term reversal noise; the fresh-month return IS part of the edge. Raw 126d window confirmed correct. |
 | 2.2 Vol-adjusted (30d/60d) | FAIL | FAIL | REJECTED | 8 Oct 2026 | 30d: EV +0.92% but 5/10 yrs; OOS +0.32% (< bar); 2026 flips negative. 60d: EV +0.42% (< bar); OOS -0.23%. maxDD improved slightly (30d: -33.8% vs -37.6%) but edge destroyed. Finding: high-sigma names ARE the SGX momentum edge; vol-adjustment filters out the payers. |
 | 2.3 Breadth gate | PASS | FAIL (year-count) | REJECTED — STRONGEST KNOWN VARIANT | 8 Oct 2026 | Stage 1: EV +2.30%, 6/10 yrs, maxDD -31.1%. OOS: EV +3.26% but 2/5 yrs (< 4 bar — a bar the incumbent also fails). Strict dominance vs champion on all metrics (EV, maxDD, Sharpe, win rate, 2022-24 bleed halved). Concentration improved but not healed: top-5 share 102% (vs 146%); still carried by 2025-H2/2026-H1. Owner decision: HOLD THE BAR — finish Phase 2 before any succession. |
-| 2.4 Trailing exit | — | — | pending | | |
+| 2.4 Trailing exit | FAIL | FAIL | REJECTED | 8 Oct 2026 | 15% trailing stop: Stage 1 EV +0.26% (< bar), maxDD unchanged (-36.5%); OOS +0.14%, IS +0.16%. Trades 322->361 (stop->rebuy cost churn); added a 2020 loss. Finding: the edge lives in drawdown-surviving winners; every hold-side overlay tested (skip, vol-adj, trail) filters out the profit source. Hold-through-the-noise edge. |
 | 2.5 Thin-leadership threshold | — | — | pending | | |
-| 2.6 Combined (2.1+2.2) | — | — | pending | | |
+| 2.6 Combined (2.1+2.2) | — | — | CANCELLED | 8 Oct 2026 | Both components rejected individually; combining rejected variants is moot. A breadth+trail combo is dominated by breadth alone (2.4). |
 | 3.1 Volume breakout | — | — | pending | | |
 | 3.2 Support bounce | — | — | pending | | |
 | 3.4 PEAD | — | — | pending | | |
