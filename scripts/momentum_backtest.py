@@ -141,7 +141,7 @@ if not td.empty:
 print("\nBAR: EV > +0.6%/trade after costs AND net positive in >= 6 of 10 years.")
 import os
 os.makedirs("results", exist_ok=True)
-_tag = f"skip{a.skip}" if a.skip else "raw"
+_tag = (f"skip{a.skip}" if a.skip else "") + (f"_voladj{a.vol_adj}" if a.vol_adj else "") + (f"_br{a.breadth}" if a.breadth else "") or "raw"
 _win = ""
 if a.entry_start or a.entry_end:
     _win = f"_{a.entry_start or 'start'}_{a.entry_end or 'end'}"

@@ -3,7 +3,10 @@ Is the champion's edge distributed or concentrated?"""
 import glob
 import pandas as pd
 
-td = pd.read_csv(sorted(glob.glob("results/champion_trades_*.csv"))[-1])
+import sys
+_fp = sys.argv[1] if len(sys.argv) > 1 else sorted(glob.glob("results/champion_trades_*.csv"))[-1]
+print(f"Trades log: {_fp}")
+td = pd.read_csv(_fp)
 td["year"] = td.exit_date.str[:4]
 td["half"] = td.exit_date.str[:4] + td.exit_date.str[5:7].apply(lambda m: "-H1" if int(m) <= 6 else "-H2")
 
