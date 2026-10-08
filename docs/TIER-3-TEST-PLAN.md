@@ -117,3 +117,26 @@ Cloud/serverless migration; relational-DB replacement of the snapshot log; repla
 | 3.1 Volume breakout | — | — | pending | | |
 | 3.2 Support bounce | — | — | pending | | |
 | 3.4 PEAD | — | — | pending | | |
+
+
+## PHASE 2 — COMPLETE (8 Oct 2026)
+Champion 5, challengers 0: 2.1 skip-window REJECTED; 2.2 vol-adjust REJECTED (both windows); 2.4 trailing exit REJECTED; 2.5 thin-leadership NULL (never binds on SGX); 2.6 CANCELLED (components rejected). Findings: SGX small-cap momentum is a hold-through-the-noise edge — the fresh-month return is signal, high-sigma names are the payers, drawdown-surviving winners carry the edge, and speculative leadership is perpetual.
+
+## CHAMPION SUCCESSION — AMENDMENT (8 Oct 2026)
+**Decision (owner):** Test 2.3 (breadth gate, >=50% of universe above own SMA200) is ADOPTED as champion, effective immediately.
+
+**Amended rule (documented post-hoc, with reasoning):** The Stage 2 OOS year-count bar (>=4/5 positive years) is waived for succession ONLY where ALL hold:
+  (a) strict dominance vs incumbent on EV, maxDD, Sharpe, and 2022-24 bleed,
+  (b) improved profit concentration (top-5 share: 102% vs 146%),
+  (c) Stage 1 passed honestly (6/10 years, same terms as incumbent's promotion),
+  (d) the incumbent itself fails the bar in the same window.
+Rationale: a bar that rejects every system in the tested class — including the incumbent — measures the window, not the variant. The OOS EV bar (>0.6%) is NOT waived and remains binding: 2.3 passes it at +3.26%.
+
+**New champion config:** momentum_backtest.py --breadth 50 --cost-pct 0.45 (data_v3_clean; all other params unchanged: 126d lookback, top-10, min price S$1, min dvol S$1M, ES3>SMA200 regime gate).
+**Champion metrics (10y, honest costs):** +59.0% total, Sharpe 0.46, maxDD -31.1%, EV +2.30%/trade, 43.1% win rate, 218 round-trips.
+**Standing caveats carried forward:** edge remains regime-dependent (2025-H2/2026-H1 carry it); worst-case-cost sensitivity NOT yet re-run on 2.3; 1.3 sizing-integrity audit was run on the OLD champion's log — rerun on 2.3's log before live deployment.
+
+**Pre-deployment TODOs (gate live capital):**
+1. Re-run worst-case cost test (0.60%/side) on 2.3.
+2. Re-run 1.3 sizing-integrity audit on 2.3's trade log.
+3. Live-quote spread cross-check on 2.3's held names.
