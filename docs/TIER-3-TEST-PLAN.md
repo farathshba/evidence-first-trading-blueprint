@@ -195,3 +195,9 @@ main is now PR-only at the platform level: 1 approving review required (CODEOWNE
 
 ## PROTECTION POLICY: SOLO-MAINTAINER MODE (9 Oct 2026)
 required_approving_review_count lowered 1 -> 0 while the repo has a sole maintainer (author cannot approve own PRs; count=1 added bypass noise with no second reviewer to gate). PR requirement, CODEOWNERS review-request, force-push/deletion bans, and linear history all remain in force; admin bypass remains audit-logged. STANDING RULE: the count returns to 1 on the first external contributor PR. Protection rationale unchanged: the PR trail is the asset.
+
+## TEST 3.5 — EMA 9/20 + RSI daily probe (pre-registered 9 Oct 2026, before any run)
+- Subject: ema-9-20-rsi-atr-trading skill. ATR stop/target module EXCLUDED a priori (refuted component). The skill's 15M/1H/4H versions are untestable with daily-only lab data and therefore not adoptable regardless of this result; the daily cousin is the closest testable proxy.
+- Spec: long-only. Entry EMA9/20 cross up + RSI14>50 + close>EMA9, eligible name (>=S$1, >=S$1M 20d $vol), regime open (ES3>SMA200), fill next open. Exit: cross down or close<EMA20, fill next open. Costs 0.45%/side.
+- BARS: Stage 1 EV > +0.6% after costs AND >=6/10 positive years; Stage 2 OOS (2022-26) EV >= +0.6% AND >=4/5 positive years.
+- Hypothesis against the wall: expected hold ~10-20 days sits inside the friction wall zone that killed breakout, bounce, and drift. Prior: FAIL.
