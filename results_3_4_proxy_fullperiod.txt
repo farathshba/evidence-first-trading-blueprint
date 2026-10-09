@@ -1,0 +1,21 @@
+=== TEST 3.4-PROXY: POST-GAP DRIFT (5-20d) ===
+Round-trips: 56  win rate: 42.9%  EV: +0.23%/trade
+
+By exit year:
+      trades  sum_pct
+year                 
+2017       1     6.57
+2018       3    27.21
+2019       2   -16.95
+2020       5   -31.77
+2021       5   -41.54
+2022       3     6.85
+2023       6    41.20
+2024       2   -17.09
+2025      12    41.94
+2026      17    -3.54
+
+BAR: EV > +0.6%/trade after costs AND net positive in >= 6 of 10 years.
+Positive years: 5/10
+STAGE 1 VERDICT: FAIL
+Trades log -> results/strategy_3_4_trades_raw.csv
