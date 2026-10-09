@@ -145,3 +145,8 @@ Rationale: a bar that rejects every system in the tested class — including the
 1. **Worst-case cost (0.60%/side): PASS.** EV +1.99% (> 0.6 bar), 6/10 positive years, maxDD -31.9%, Sharpe 0.44. Cost sensitivity: 0.35% -> +2.50% EV; 0.45% -> +2.30%; 0.60% -> +1.99%. The worst case at nearly double the OLD champion's mid-case EV (+1.04%). Succession stands unconditionally on costs — no asterisk.
 2. **Sizing integrity on 2.3 log: PASS.** Stake P&L-blind; byte-identical reruns; documented quirks deterministic.
 3. **Live spread cross-check: PENDING** — requires market hours (SGX 09:00-17:30 SGT).
+
+## PRE-DEPLOYMENT AUDIT 3 — LIVE SPREAD CHECK (9 Oct 2026, ~10:15 SGT, market open)
+Basket (champion top-10, live quotes): PCT 0.14%, 558 0.18%, EB5 0.11%, BS6 0.10%, E28 0.20%, HSHD 0.21%, CC3 0.45%, OV8 0.17%, P8Z 0.25%, S58 0.14% (half-spreads).
+Median half-spread 0.17%, mean 0.19% vs assumed 0.45%/side: >2x headroom on the basket. VERDICT: PASS — all three pre-deployment gates clear; champion cleared for live capital.
+Footnotes: CC3 exactly at 0.45% and thin live volume today (~S$109k) — watch on live fills; quotes are 10-min delayed (indicative, not depth-checked). ES3_SI data file has capitalized headers inconsistent with the rest of data_v3_clean — normalize in a future tidy commit.
