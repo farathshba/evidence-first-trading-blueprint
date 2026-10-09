@@ -211,11 +211,11 @@ Pre-registered bars: EV > +0.6%/trade after costs AND positive in >= 6/10 years.
 - Apparatus fixes en route (all silent-failure bugs, now compile-gated with stage diagnostics): ES3 yfinance MultiIndex columns, tz-aware index normalization, lowercase CSV headers in data_v3_clean.
 - Run outputs archived: results/test_3_5_{full,is,oos}.txt, results/test_3_5_trades_oos.csv.
 
-## TEST 3.5 VERDICT — EMA 9/20 + RSI daily probe (9 Oct 2026): FAIL — TOMBSTONE
-Pre-registered bars: EV > +0.6%/trade after costs AND positive in >= 6/10 years.
-- Full 2016-26: 1,683 trades, EV -0.85%/trade after 0.9% costs, median -2.34%, win rate 21.9%, avg hold 21d, positive years 2/11. BAR 1 FAIL, BAR 2 FAIL.
-- IS 2016-21: 758 trades, EV -0.90%, 1/6 positive years. OOS 2022-26: 925 trades, EV -0.80%, 1/5 positive years. Stage 2 moot — Stage 1 decisive.
-- **Gross edge ~= +0.05%/trade before costs** — no edge at all; the friction wall converts it to -0.85% net. Fourth confirming data point for the Phase 3 synthesis (breakout -0.83%, bounce -1.39%, drift sub-friction, EMA/RSI +0.05% gross).
-- Subject: ema-9-20-rsi-atr-trading skill — DELETED from the skill registry 9 Oct 2026. Its 15M/1H/4H versions are untestable with daily-only lab data and not adoptable regardless.
-- Apparatus fixes en route (all silent-failure bugs, now compile-gated with stage diagnostics): ES3 yfinance MultiIndex columns, tz-aware index normalization, lowercase CSV headers in data_v3_clean.
-- Run outputs archived: results/test_3_5_{full,is,oos}.txt, results/test_3_5_trades_oos.csv.
+## TEST 3.6 — Sector momentum / rotation (trade-sector skill) — PRE-REGISTERED 10 Oct 2026, before any run
+- Subject: trade-sector skill (rotation claim: money flows to strongest sectors — pick leaders there).
+- Spec: standalone monthly rotation on the champion universe (>=S$1, >=S$1M 20d $vol), champion 2.3 gates (ES3>SMA200 AND breadth >=50% above SMA200). Sector momentum = equal-weight mean 126d return of a sector's eligible members (sector needs >=5 eligible members). Monthly: top-2 sectors by sector momentum; from them top-10 stocks by 126d return (shortfall filled from next-ranked sectors). Equal weight. Costs 0.45%/side per position-month round trip.
+- Baseline: identical engine, same run, NO sector filter (pure champion selection) — only selection differs.
+- Sector data: yfinance sector per ticker, cached in data_v3_clean/_sectors.csv; tickers without sector excluded from overlay only.
+- VOID condition: sector coverage < 80% of universe (stated in output).
+- BARS (Stage 1, 2016-26): overlay EV/trade > +0.6% after costs AND >= 6/10 positive years AND overlay EV >= baseline EV AND maxDD not worse than baseline by >5pp. Stage 2 (OOS 2022-26): same with >=4/5 positive years.
+- Prior: FAIL — monthly hold amortizes friction, but stock-level 126d momentum already embeds sector effects; adding a sector gate adds concentration without a structural reason to beat the champion.
