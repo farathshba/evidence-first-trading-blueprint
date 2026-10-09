@@ -43,11 +43,17 @@ def main():
     p = os.path.join(a.data_dir, 'ES3.SI.csv')
     if os.path.exists(p):
         e = pd.read_csv(p, parse_dates=['Date']).sort_values('Date')
+        es3 = e.set_index('Date')['Adj Close'].astype(float)
     else:
         import yfinance as yf
-        e = yf.download('ES3.SI', start='2014-01-01', auto_adjust=False).reset_index()
-        e.columns = [str(c).title() for c in e.columns]
-    es3 = e.set_index('Date')['Adj Close'].astype(float)
+        raw = yf.download('ES3.SI', start='2014-01-01', auto_adjust=False, progress=False)
+        if isinstance(raw.columns, pd.MultiIndex):
+            raw.columns = [c[0] if isinstance(c, tuple) else str(c) for c in raw.columns]
+        raw = raw.reset_index()
+        raw.columns = [str(c).strip().lower() for c in raw.columns]
+        dcol = next(c for c in raw.columns if 'date' in c or c == 'price')
+        raw[dcol] = pd.to_datetime(raw[dcol])
+        es3 = raw.set_index(dcol)['adj close'].astype(float).sort_index()
     reg_series = (es3 > es3.rolling(200).mean()).astype(float)
 
     trades = []
