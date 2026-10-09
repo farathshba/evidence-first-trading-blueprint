@@ -1,0 +1,23 @@
+universe tickers: 394
+[25/394] 42R_SI: Consumer Cyclical
+[50/394] 5DP_SI: Consumer Cyclical
+[75/394] 5PC_SI: Real Estate
+[100/394] A30_SI: Consumer Cyclical
+[125/394] BCV_SI: Industrials
+[150/394] BS6_SI: Industrials
+[175/394] CIN_SI: Industrials
+[200/394] F34_SI: Consumer Defensive
+[223/394] HMTD_SI: MISSING
+[225/394] HPCD_SI: Energy
+[226/394] HPPD_SI: MISSING
+[229/394] HSMD_SI: MISSING
+[231/394] HXXD_SI: MISSING
+[250/394] L19_SI: Industrials
+[275/394] N32_SI: Basic Materials
+[300/394] P7VU_SI: Industrials
+[325/394] S41_SI: Financial Services
+[350/394] TCPD_SI: Consumer Defensive
+[375/394] WKS_SI: Communication Services
+
+COVERAGE: 390/394 (99%) -> data_v3_clean/_sectors.csv
+VOID if coverage < 80% (pre-registered Test 3.6 condition)
