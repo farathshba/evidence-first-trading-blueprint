@@ -73,12 +73,16 @@ def main():
         if base.upper().startswith(('ES3', '^STI')):
             continue
         try:
-            df = pd.read_csv(f, parse_dates=['Date']).sort_values('Date').reset_index(drop=True)
+            df = pd.read_csv(f)
+            df.columns = [str(c).strip().title() for c in df.columns]
+            if 'Date' not in df.columns or 'Adj Close' not in df.columns:
+                continue
+            df['Date'] = pd.to_datetime(df['Date']).dt.normalize()
+            df = df.sort_values('Date').reset_index(drop=True)
         except Exception:
             continue
         if len(df) < 260:
             continue
-        df['Date'] = pd.to_datetime(df['Date']).dt.normalize()
         adj   = df['Adj Close'].astype(float)
         close = df['Close'].astype(float)
         open_ = df['Open'].astype(float)
