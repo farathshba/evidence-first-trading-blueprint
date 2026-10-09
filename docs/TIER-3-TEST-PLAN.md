@@ -189,3 +189,6 @@ Written to docs/PHASE-4-RUNBOOK.md: monthly rebalance procedure (signal rules ve
 
 ## OPEN-SOURCE PREP (9 Oct 2026)
 README.md added (evidence summary: validated / tombstoned / real-but-sub-friction + friction-wall finding + repo map) and CONTRIBUTING.md added (the constitution: pre-registration, two-stage guardrail, cost modeling, tombstone discipline, issue-first workflow for proposals, and explicit "don't re-litigate tombstoned classes" rules). Owner intent: open the repo so contributors extend the system under the same evidence-first discipline that built it.
+
+## BRANCH PROTECTION ENFORCED (9 Oct 2026)
+main is now PR-only at the platform level: 1 approving review required (CODEOWNERS: owner reviews everything), force-pushes and deletions disabled, linear history required (squash-merge only). Owner retains an admin bypass (enforce_admins=false) for emergencies — bypassed pushes are audit-logged by GitHub. Rationale: the repo's core asset is the evidence trail; protection makes casual or accidental rewrites of main impossible for all actors including future contributors. All changes — including live rebalance records — now flow through PRs.
