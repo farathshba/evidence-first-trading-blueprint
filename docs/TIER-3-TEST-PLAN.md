@@ -150,3 +150,10 @@ Rationale: a bar that rejects every system in the tested class — including the
 Basket (champion top-10, live quotes): PCT 0.14%, 558 0.18%, EB5 0.11%, BS6 0.10%, E28 0.20%, HSHD 0.21%, CC3 0.45%, OV8 0.17%, P8Z 0.25%, S58 0.14% (half-spreads).
 Median half-spread 0.17%, mean 0.19% vs assumed 0.45%/side: >2x headroom on the basket. VERDICT: PASS — all three pre-deployment gates clear; champion cleared for live capital.
 Footnotes: CC3 exactly at 0.45% and thin live volume today (~S$109k) — watch on live fills; quotes are 10-min delayed (indicative, not depth-checked). ES3_SI data file has capitalized headers inconsistent with the rest of data_v3_clean — normalize in a future tidy commit.
+
+## TEST 3.1 — VOLUME BREAKOUT: VERDICT & DIAGNOSTIC (9 Oct 2026)
+**STAGE 1: FAIL** — 26 round-trips, EV -0.28%, win rate 42.3%, 1/5 positive years. IS (2016-21): ZERO triggers. OOS identical to full period (all trades post-2022).
+**Diagnostics (same day):**
+- Adjustment concern cleared: median adjclose/close ratio 1.000 across 395 books; 1 book materially adjusted (0.317). close=adjclose design does not distort breakout logic here.
+- Signal anatomy: breakout condition fires 300-500x/yr through 2024, then 1314 (2025) / 1432 (2026) — breakouts are 3-4x more common in the current regime. Consolidation <8% over 20d is the binding filter: intersection with breakout+volume is ~0-26 triggers/yr.
+**Finding:** as pre-registered, the strategy is nearly untestable on this universe (26 trades in 10 years, 2/3 in the current bull regime, EV negative). FAIL stands on the measured trades, but this is WEAK evidence against the breakout class — the spec, not the class, strangled the sample. Optional pre-registered sensitivity (3.1b): loosen consolidation to 15% to test the class with an adequate sample; any 3.1b result requires full re-registration and cannot promote on this run's evidence. Class-level tombstone remains premature.
