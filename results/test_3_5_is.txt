@@ -1,0 +1,15 @@
+[diag] ES3 rows: 3205 (2014-01-02..2026-10-09), regime open share: 0.69
+[diag] files scanned: 394, entry signals pre-regime: 1078, post-regime: 758
+Trades: 758 | EV/trade: -0.90% | median: -2.22% | win rate: 23.4% | avg hold: 24d
+
+Year-by-year:
+  2016: n=  26  EV=-2.43%  win=8%
+  2017: n= 202  EV=-0.09%  win=29%
+  2018: n=  96  EV=-2.39%  win=11%
+  2019: n= 133  EV=-1.64%  win=24%
+  2020: n=  53  EV=+2.02%  win=45%
+  2021: n= 248  EV=-1.05%  win=20%
+
+Positive years: 1/6
+BAR 1 (EV > +0.6% after costs):  FAIL
+BAR 2 (>= 6/10 positive years): FAIL
