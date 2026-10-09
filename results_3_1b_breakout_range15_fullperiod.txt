@@ -1,0 +1,22 @@
+=== TEST 3.1: VOLUME BREAKOUT (1-5d) ===
+Round-trips: 102  win rate: 37.3%  EV: -0.83%/trade
+
+By exit year:
+      trades  sum_pct
+year                 
+2016       1    -5.65
+2017       2     2.30
+2018       1    21.86
+2019       3    -6.61
+2020       2   -27.76
+2021       3    25.93
+2022       3    -6.85
+2023       6     6.08
+2024       7   -21.60
+2025      33   -12.06
+2026      41   -59.81
+
+BAR: EV > +0.6%/trade after costs AND net positive in >= 6 of 10 years.
+Positive years: 4/11
+STAGE 1 VERDICT: FAIL
+Trades log -> results/strategy_3_1_trades_raw.csv
