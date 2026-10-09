@@ -201,3 +201,12 @@ required_approving_review_count lowered 1 -> 0 while the repo has a sole maintai
 - Spec: long-only. Entry EMA9/20 cross up + RSI14>50 + close>EMA9, eligible name (>=S$1, >=S$1M 20d $vol), regime open (ES3>SMA200), fill next open. Exit: cross down or close<EMA20, fill next open. Costs 0.45%/side.
 - BARS: Stage 1 EV > +0.6% after costs AND >=6/10 positive years; Stage 2 OOS (2022-26) EV >= +0.6% AND >=4/5 positive years.
 - Hypothesis against the wall: expected hold ~10-20 days sits inside the friction wall zone that killed breakout, bounce, and drift. Prior: FAIL.
+
+## TEST 3.5 VERDICT — EMA 9/20 + RSI daily probe (9 Oct 2026): FAIL — TOMBSTONE
+Pre-registered bars: EV > +0.6%/trade after costs AND positive in >= 6/10 years.
+- Full 2016-26: 1,683 trades, EV -0.85%/trade after 0.9% costs, median -2.34%, win rate 21.9%, avg hold 21d, positive years 2/11. BAR 1 FAIL, BAR 2 FAIL.
+- IS 2016-21: 758 trades, EV -0.90%, 1/6 positive years. OOS 2022-26: 925 trades, EV -0.80%, 1/5 positive years. Stage 2 moot — Stage 1 decisive.
+- **Gross edge ~= +0.05%/trade before costs** — no edge at all; the friction wall converts it to -0.85% net. Fourth confirming data point for the Phase 3 synthesis (breakout -0.83%, bounce -1.39%, drift sub-friction, EMA/RSI +0.05% gross).
+- Subject: ema-9-20-rsi-atr-trading skill — DELETED from the skill registry 9 Oct 2026. Its 15M/1H/4H versions are untestable with daily-only lab data and not adoptable regardless.
+- Apparatus fixes en route (all silent-failure bugs, now compile-gated with stage diagnostics): ES3 yfinance MultiIndex columns, tz-aware index normalization, lowercase CSV headers in data_v3_clean.
+- Run outputs archived: results/test_3_5_{full,is,oos}.txt, results/test_3_5_trades_oos.csv.
