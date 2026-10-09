@@ -219,3 +219,12 @@ Pre-registered bars: EV > +0.6%/trade after costs AND positive in >= 6/10 years.
 - VOID condition: sector coverage < 80% of universe (stated in output).
 - BARS (Stage 1, 2016-26): overlay EV/trade > +0.6% after costs AND >= 6/10 positive years AND overlay EV >= baseline EV AND maxDD not worse than baseline by >5pp. Stage 2 (OOS 2022-26): same with >=4/5 positive years.
 - Prior: FAIL — monthly hold amortizes friction, but stock-level 126d momentum already embeds sector effects; adding a sector gate adds concentration without a structural reason to beat the champion.
+
+## TEST 3.6 VERDICT — Sector momentum (trade-sector skill) (10 Oct 2026): VOID — INSUFFICIENT SECTOR COVERAGE
+Pre-registered VOID condition: sector coverage < 80% of universe. IT FIRED.
+- Yahoo assetProfile classifies only 227/394 (58%) of the universe; 167 tickers return literal 'n/a'. The fetch script's 390/394 self-count was inflated by counting 'n/a' strings as covered (fetch bug, logged honestly); pandas correctly reads them as missing. No bars evaluated, no verdict rendered.
+- Exploratory read (NON-AUTHORITATIVE, post-hoc, coverage-confounded — overlay drawn from the 58% covered subset only): overlay EV/trade -0.07% vs baseline +1.68% (full); -2.08pp in 2021, -1.19pp in 2026. Directionally consistent with the prior: stock-level 126d momentum already embeds sector effects; a sector gate adds concentration, not edge.
+- Engine note: both arms share identical gates (ES3 + breadth >= 50%) and dates; absolute EVs are NOT comparable to the official champion backtest (different engine, monthly close-to-close). Gates closed for most of 2016-2020 (universe data starts 2016-10 + 126d/200d lookbacks + breadth), so active months concentrate in 2021-26.
+- Disposition: trade-sector skill DELETED from the registry 10 Oct 2026 (untestable with available data + directionally negative). Test 3.6 can be revived only with a sector source covering >= 80% of the universe; revive = new pre-registration.
+- Apparatus note: macOS Gatekeeper blocked downloaded scripts (quarantine); worked around via hash verification (sha256 recorded in kit PR) + typed xattr removal. Fetch script n/a-counting bug noted above.
+- Run outputs archived: results/test_3_6_{full,is,oos}.txt; sector map at data_v3_clean/_sectors.csv (58% coverage).

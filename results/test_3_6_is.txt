@@ -1,0 +1,17 @@
+[diag] universe: 394 tickers, 2518 rows (2016-10-06..2026-10-06)
+[diag] sector coverage: 227/394 (58%)
+
+=== OVERLAY (sector momentum) ===
+EV/trade: -0.18% | trades: 80 | positive years: 0/6 | maxDD (monthly): -3.6%
+=== BASELINE (champion selection) ===
+EV/trade: +2.93% | trades: 80 | positive years: 1/6 | maxDD (monthly): -6.4%
+
+Year-by-year (overlay EV vs baseline EV, portfolio monthly mean %):
+  2016: overlay  +0.00%  baseline  +0.00%  delta +0.00pp
+  2017: overlay  +0.00%  baseline  +0.00%  delta +0.00pp
+  2018: overlay  +0.00%  baseline  +0.00%  delta +0.00pp
+  2019: overlay  +0.00%  baseline  +0.00%  delta +0.00pp
+  2020: overlay  +0.00%  baseline  +0.00%  delta +0.00pp
+  2021: overlay  -0.13%  baseline  +2.13%  delta -2.27pp
+
+COVERAGE 58% < 80% — TEST 3.6 IS VOID (pre-registered condition)
