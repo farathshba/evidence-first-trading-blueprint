@@ -54,9 +54,16 @@ def main():
         dcol = next(c for c in raw.columns if 'date' in c or c == 'price')
         raw[dcol] = pd.to_datetime(raw[dcol])
         es3 = raw.set_index(dcol)['adj close'].astype(float).sort_index()
+    idx = pd.to_datetime(es3.index)
+    if getattr(idx, 'tz', None) is not None:
+        idx = idx.tz_localize(None)
+    es3.index = idx.normalize()
     reg_series = (es3 > es3.rolling(200).mean()).astype(float)
+    print(f"[diag] ES3 rows: {len(es3)} ({es3.index[0].date()}..{es3.index[-1].date()}), regime open share: {reg_series.mean():.2f}")
 
     trades = []
+    n_eo = 0
+    n_reg = 0
     files = sorted(glob.glob(os.path.join(a.data_dir, '*.csv')))
     for f in files:
         base = os.path.basename(f)[:-4]
@@ -83,8 +90,11 @@ def main():
         if a.entry_start: entry_ok &= (df['Date'] >= pd.Timestamp(a.entry_start))
         if a.entry_end:   entry_ok &= (df['Date'] <= pd.Timestamp(a.entry_end))
 
+            df['Date'] = pd.to_datetime(df['Date']).dt.normalize()
         reg = reg_series.reindex(df['Date'], method='ffill').fillna(0.0).values
         eo, xs, n = entry_ok.values, exit_sig.values, len(df)
+        n_eo += int(eo.sum())
+        n_reg += int((eo & (reg > 0)).sum())
         i = 0
         while i < n - 1:
             if eo[i] and reg[i] == 1 and not np.isnan(open_.iloc[i+1]):
@@ -102,6 +112,7 @@ def main():
             else:
                 i += 1
 
+    print(f"[diag] files scanned: {len(files)}, entry signals pre-regime: {n_eo}, post-regime: {n_reg}")
     t = pd.DataFrame(trades, columns=['sig_date','ticker','entry','exit','exit_date','ev_pct','hold_days'])
     if t.empty:
         print("NO TRADES"); return
