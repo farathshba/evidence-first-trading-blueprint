@@ -192,3 +192,6 @@ README.md added (evidence summary: validated / tombstoned / real-but-sub-frictio
 
 ## BRANCH PROTECTION ENFORCED (9 Oct 2026)
 main is now PR-only at the platform level: 1 approving review required (CODEOWNERS: owner reviews everything), force-pushes and deletions disabled, linear history required (squash-merge only). Owner retains an admin bypass (enforce_admins=false) for emergencies — bypassed pushes are audit-logged by GitHub. Rationale: the repo's core asset is the evidence trail; protection makes casual or accidental rewrites of main impossible for all actors including future contributors. All changes — including live rebalance records — now flow through PRs.
+
+## PROTECTION POLICY: SOLO-MAINTAINER MODE (9 Oct 2026)
+required_approving_review_count lowered 1 -> 0 while the repo has a sole maintainer (author cannot approve own PRs; count=1 added bypass noise with no second reviewer to gate). PR requirement, CODEOWNERS review-request, force-push/deletion bans, and linear history all remain in force; admin bypass remains audit-logged. STANDING RULE: the count returns to 1 on the first external contributor PR. Protection rationale unchanged: the PR trail is the asset.
