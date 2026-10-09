@@ -186,3 +186,6 @@ Tier 3 state: Phases 1-3 complete; Phase 2 succession adopted (2.3 breadth gate,
 
 ## PHASE 4 — OPERATIONAL RUNBOOK (9 Oct 2026)
 Written to docs/PHASE-4-RUNBOOK.md: monthly rebalance procedure (signal rules verbatim from the audited backtest incl. breadth + regime gates), execution windows and limit-order discipline for SGX small caps, per-order fill log vs the 0.45% assumption (ramp criterion: mean cost/side in [0.20%, 0.70%] over 3 months), monthly monitoring vs documented behavior, pre-registered kill criteria (structural / logical / behavioral — explicitly NOT P&L-based), and same-day commit discipline for live records. Tier 3 is now fully specified: the system is deployed by reading the runbook, not by improvising.
+
+## OPEN-SOURCE PREP (9 Oct 2026)
+README.md added (evidence summary: validated / tombstoned / real-but-sub-friction + friction-wall finding + repo map) and CONTRIBUTING.md added (the constitution: pre-registration, two-stage guardrail, cost modeling, tombstone discipline, issue-first workflow for proposals, and explicit "don't re-litigate tombstoned classes" rules). Owner intent: open the repo so contributors extend the system under the same evidence-first discipline that built it.
