@@ -42,7 +42,10 @@ def main():
         for n in names:
             if n in cols: return cols[n]
         return None
-    cs, cp, cv = col('symbol'), col('lastprice', 'last sale', 'price'), col('volume')
+    print(f"[diag] screener columns: {list(df.columns)}")
+    cs, cp, cv = col('symbol'), col('lastsale', 'lastprice', 'last sale', 'price'), col('volume')
+    if not all([cs, cp, cv]):
+        raise SystemExit(f"MISSING COLUMN - symbol={cs} price={cp} volume={cv}; paste me the [diag] screener columns line above")
     df = df.rename(columns={cs: 'symbol', cp: 'price', cv: 'volume'})
     for c in ('symbol', 'price', 'volume'):
         df[c] = df[c].astype(str).str.replace(r'[$,%]', '', regex=True)
