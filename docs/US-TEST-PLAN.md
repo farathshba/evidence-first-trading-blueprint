@@ -16,3 +16,11 @@
 - Second cause: fetch started 2016-01, consuming 2016 in lookbacks. Refetch at 2014-01.
 - EV inflation note: survivorship-only universe + 12 cherry months; the +12.86% is not evidence of edge under any bar.
 - Rerun authorized under the SAME pre-registration (apparatus fix, not a spec change). Bars unchanged.
+
+## TEST 4.1 RUN 2 (10 Oct 2026, post-fix): IS PASS / OOS VOID / stress PASS
+- Full: EV +4.24%, 560 trades, BAR 1 PASS, BAR 2 PASS on letter (6/13 positive years — concentration caveat: edge lives in 2016/2020/2021/2024/2025; regime-dependent, not all-weather). 56/153 months in market. maxDD -25.9% monthly equity.
+- IS (2014-21): PASS — EV +4.36%, 440 trades.
+- Stress (0.55%/side): PASS — EV +3.84%. Edge survives realistic microcap fills.
+- OOS (2022-26): VOID — 120 < 150 trades (genuine; gate-closed regime, not apparatus). No out-of-sample confirmation exists.
+- Apparatus: ZeroDivision guard added (commit 579dc30) after 2014 start exposed empty-breadth dates; breadth point-in-time fix from PR #22 confirmed working (56 vs 12 months in market).
+- Standing verdict: in-sample US microcap edge exists at conservative costs; replication NOT demonstrated out-of-sample. Next: pre-register Test 4.2 or accept VOID as final. Bars before runs, as always.
