@@ -79,7 +79,8 @@ def main():
     sma200 = A.rolling(200).mean()
     above = (A > sma200)
     listed = sma200.notna()
-    breadth = (above.where(listed).sum(axis=1) / listed.sum(axis=1)).fillna(0.0)
+    denom = listed.sum(axis=1).replace(0, np.nan)
+    breadth = (above.where(listed).sum(axis=1) / denom).fillna(0.0)
     # point-in-time fix: breadth denominator = only tickers with 200d history at that date
     # (pre-fix bug: NaN comparisons returned False, crushing breadth in early years)
 
