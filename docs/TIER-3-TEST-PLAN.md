@@ -228,3 +228,17 @@ Pre-registered VOID condition: sector coverage < 80% of universe. IT FIRED.
 - Disposition: trade-sector skill DELETED from the registry 10 Oct 2026 (untestable with available data + directionally negative). Test 3.6 can be revived only with a sector source covering >= 80% of the universe; revive = new pre-registration.
 - Apparatus note: macOS Gatekeeper blocked downloaded scripts (quarantine); worked around via hash verification (sha256 recorded in kit PR) + typed xattr removal. Fetch script n/a-counting bug noted above.
 - Run outputs archived: results/test_3_6_{full,is,oos}.txt; sector map at data_v3_clean/_sectors.csv (58% coverage).
+
+## DECISION RECORD (10 Oct 2026) — SGX holdings retained; US expansion track opened
+- Owner proposed closing all SGX holdings and pivoting to US markets. REJECTED after evidence review: the SGX holdings include the validated system (champion 2.3) and a healthy momentum top-10 position (E28); the proposed destination had zero backtests, zero data, zero tested rules.
+- SGX side UNCHANGED: all holdings kept; legacy liquidation decisions (E5H, KJ5, A31) stand; champion deploys S$5,000 at the 2 Nov 2026 rebalance per docs/PHASE-4-RUNBOOK.md.
+- US side NEW: full expansion track opened — research, pre-registered backtests on a US sub-US$10 universe, then paper trading (min 8 weeks), then capital only if every gate passes. Committed in docs/PHASE-US-1-RUNBOOK.md.
+- Strategy hunt of 10 Oct (community sources: quantifiedstrategies, r/swingtrading, srtrader, r/singaporefi, Gemini-recommended frameworks) produced ZERO new testable families — every candidate mapped to an already-executed family (crossover 3.5, bounce 3.2, breakout 3.1b, drift 3.4, mean reversion Tier 2) or was untestable with daily data. The friction-wall synthesis independently confirmed by practitioner consensus.
+- Broker research: zero-commission SG-accessible brokers monetize via FX spread (moomoo ~0.2-0.5%, Tiger ~0.15%, Webull conversion spread); IBKR near-zero FX (~0.002%). Decision deferred to US Phase 3.
+
+## DECISION RECORD (10 Oct 2026) — SGX holdings retained; US expansion track opened
+- Owner proposed closing all SGX holdings and pivoting to US markets. REJECTED after evidence review: the SGX holdings include the validated system (champion 2.3) and a healthy momentum top-10 position (E28); the proposed destination had zero backtests, zero data, zero tested rules.
+- SGX side UNCHANGED: all holdings kept; legacy liquidation decisions (E5H, KJ5, A31) stand; champion deploys S$5,000 at the 2 Nov 2026 rebalance per docs/PHASE-4-RUNBOOK.md.
+- US side NEW: full expansion track opened — research, pre-registered backtests on a US sub-US$10 universe, then paper trading (min 8 weeks), then capital only if every gate passes. Committed in docs/PHASE-US-1-RUNBOOK.md.
+- Strategy hunt of 10 Oct (community sources: quantifiedstrategies, r/swingtrading, srtrader, r/singaporefi, Gemini-recommended frameworks) produced ZERO new testable families — every candidate mapped to an already-executed family (crossover 3.5, bounce 3.2, breakout 3.1b, drift 3.4, mean reversion Tier 2) or was untestable with daily data. The friction-wall synthesis independently confirmed by practitioner consensus.
+- Broker research: zero-commission SG-accessible brokers monetize via FX spread (moomoo ~0.2-0.5%, Tiger ~0.15%, Webull conversion spread); IBKR near-zero FX (~0.002%). Decision deferred to US Phase 3.
