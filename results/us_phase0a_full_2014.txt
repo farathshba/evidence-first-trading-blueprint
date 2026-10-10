@@ -1,0 +1,25 @@
+[stage 1] fetching Nasdaq screener list ...
+[diag] screener returned 7004 raw rows
+[diag] screener columns: ['symbol', 'name', 'lastsale', 'netchange', 'pctchange', 'volume', 'marketCap', 'country', 'ipoyear', 'industry', 'sector', 'url']
+[diag] price band US$1.0-10.0: 2116 candidates
+[stage 2] fetching history for 2025 new tickers (cached: 91)
+[diag] 200/2025 processed; kept 8
+[diag] 300/2025 processed; kept 39
+[diag] 350/2025 processed; kept 47
+[diag] 450/2025 processed; kept 82
+[diag] 600/2025 processed; kept 122
+[diag] 850/2025 processed; kept 192
+[diag] 1000/2025 processed; kept 241
+[diag] 1050/2025 processed; kept 256
+[diag] 1150/2025 processed; kept 285
+[diag] 1300/2025 processed; kept 334
+[diag] 1600/2025 processed; kept 434
+[diag] 1700/2025 processed; kept 464
+[diag] 1800/2025 processed; kept 502
+[diag] 1900/2025 processed; kept 539
+[diag] 1950/2025 processed; kept 557
+[diag] 2000/2025 processed; kept 571
+
+[RESULT] universe: 664 tickers in data_us/
+[diag] drops: {'short_hist': 220, 'no_data': 0, 'low_dvol': 1232}
+[diag] SURVIVORSHIP CAVEAT APPLIES: today-only universe snapshot (runbook section 2)
