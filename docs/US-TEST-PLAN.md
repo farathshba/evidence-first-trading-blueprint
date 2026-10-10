@@ -9,3 +9,10 @@
 - Stage 2 (walk-forward): freeze IS 2016-21, untouched OOS 2022-26: OOS EV >= +0.6% AND >= 4/5 positive years.
 - VOID: <150 trades Stage 1; data coverage <90%; survivorship contamination demonstrably >2pp of EV.
 - Phase 0a tool: scripts/us_universe_fetch.py (sha256 02391c9f..730e54; compile-gated; diagnostics at every stage).
+
+## TEST 4.1 RUN 1 (10 Oct 2026): VOID — pre-registered trade-count guard fired (120 < 150)
+- Output: EV +12.86% (exploratory only, NOT a verdict), 12/129 months in market, 3/11 positive years, VOID declared before any bar evaluated.
+- Autopsy found apparatus bug: breadth denominator counted unlisted-at-date tickers as "below SMA200" (NaN > NaN = False), mechanically closing gates 2016-2019. Fixed point-in-time (denominator = tickers with 200d history at date).
+- Second cause: fetch started 2016-01, consuming 2016 in lookbacks. Refetch at 2014-01.
+- EV inflation note: survivorship-only universe + 12 cherry months; the +12.86% is not evidence of edge under any bar.
+- Rerun authorized under the SAME pre-registration (apparatus fix, not a spec change). Bars unchanged.
