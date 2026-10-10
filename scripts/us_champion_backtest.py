@@ -77,7 +77,11 @@ def main():
     elig = (C >= a.min_price) & (C <= a.max_price) & (dvol >= a.min_dvol) & A.notna()
     r = A / A.shift(a.lookback) - 1.0
     sma200 = A.rolling(200).mean()
-    breadth = (A > sma200).mean(axis=1)
+    above = (A > sma200)
+    listed = sma200.notna()
+    breadth = (above.where(listed).sum(axis=1) / listed.sum(axis=1)).fillna(0.0)
+    # point-in-time fix: breadth denominator = only tickers with 200d history at that date
+    # (pre-fix bug: NaN comparisons returned False, crushing breadth in early years)
 
     spy = load_spy(a.data_dir)
     reg = pd.Series((spy > spy.rolling(200).mean()).astype(float)).reindex(A.index, method='ffill').fillna(0.0)
