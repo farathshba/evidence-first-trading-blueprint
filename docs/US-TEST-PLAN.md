@@ -72,3 +72,10 @@
 - Stress 0.55%/side: +1.00% EV, 6/13 years, maxDD -27.0% — cost-robust.
 - OOS (2022-26): VOID (120 < 150 trades, gate-closed regime). Readable subset: EV +0.69% (clears BAR 1) but 2/5 positive years (fails BAR 2) — edge concentrated 2025-26; 2026 = +1.34%.
 - Verdict: best-performing US candidate to date; survives stress; OOS unconfirmed by pre-registered terms. NOT promotable (survivorship caveat + no OOS confirmation). Retained for survivorship-free re-test if data is acquired.
+
+## TEST 4.4 COVERAGE AUDIT (11 Oct 2026): NO-GO at 75% vs 80% guard — PEAD VOID-by-coverage
+- Apparatus note: first audit run invalid (lxml ImportError corrupted 88/100 into exceptions; installed lxml 6.1.3, rerun clean, 0 exceptions).
+- Rerun (seed 42, n=100 of 666): >=8 quarters: 75/100 (75%, guard 80%). Thin 1-7: 13 (recent listings — TRUG, ABTC, BTCT et al). Zero rows: 12 — several appear to be closed-end funds/ETFs in the price-only universe (DSU, WIW, NMZ pattern), structurally uncoverable rather than a data gap.
+- Verdict: VOID-by-coverage, Test 3.6 precedent. No post-hoc bar-lowering or universe re-scoping after seeing results (4.2 precedent).
+- Revival condition (pre-declared, before any re-audit): a fund-excluded universe declared BEFORE the audit, and a source covering >=80% of it. Norgate (fund flags + point-in-time constituents) would satisfy declaration mechanics if the survivorship purchase happens. yfinance is otherwise adequate — 0 exceptions, 25-row depth on covered names.
+- Note: yfinance earnings dates are rich where present (up to 25 quarters, incl. EPS estimates) — viable signal source if the universe problem is solved upstream.
