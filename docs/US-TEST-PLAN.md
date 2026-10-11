@@ -52,3 +52,9 @@
 - Stage 2 (walk-forward): IS 2014-21 then untouched OOS 2022-26; OOS EV > +0.60% AND >= 3/5 positive OOS years. VOID floor: OOS < 150 trades -> VOID, no gate-widening reruns (4.2 precedent).
 - SURVIVORSHIP CAVEAT: screening-grade only; any Stage 2 pass requires re-run on survivorship-free data before promotion consideration.
 - Single OOS run, no edits between arms. Bars before runs.
+
+## TEST 4.3 RESULTS (11 Oct 2026): Stage 1 FAIL — reversal tombstoned on US microcaps
+- Full (21d losers, bottom-10): BAR 1 PASS (+1.01% EV, 560 trades) but BAR 2 FAIL (4/13 positive years — EV is 2016+2021 only; 8 negative years). Stress 0.55%/side: +0.61%, marginal. maxDD -42%.
+- OOS arm (2022-26): VOID (120 < 150 trades); readable subset EV -2.33%, 1/5 positive years, worst year 2024 (-2.43%) = momentum champion best regime. Anti-correlation with momentum, consistent with SGX breakout tombstone.
+- Verdict: FAIL at Stage 1. No Stage 2 per registration. Short-term reversal does NOT survive long-only after 0.35%/side with regime gates. Tombstone: mean-reversion class fails on US microcaps (third market-wide tombstone after SGX 3.2/3.4).
+- Note: IS arm not run separately (Stage 1 failure ends test); full-sample year table covers the record.

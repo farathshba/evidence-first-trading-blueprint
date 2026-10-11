@@ -36,6 +36,7 @@ def main():
     ap.add_argument('--data-dir', default='data_us')
     ap.add_argument('--breadth', type=float, default=0.5, help='breadth gate: fraction of universe above SMA200')
     ap.add_argument('--cost', type=float, default=0.35)
+    ap.add_argument('--side', default='top', choices=['top','bottom'], help='rank side: top winners or bottom losers')
     ap.add_argument('--top', type=int, default=10)
     ap.add_argument('--lookback', type=int, default=126)
     ap.add_argument('--min-price', type=float, default=1.0)
@@ -108,7 +109,7 @@ def main():
         if len(rr) == 0:
             monthly.append((d, 0.0, 0))
             continue
-        sel = rr.sort_values(ascending=False).head(a.top)
+        sel = rr.sort_values(ascending=(a.side == 'bottom')).head(a.top)
         rets = A.loc[d2, sel.index] / A.loc[d, sel.index] - 1.0
         nets = rets * 100 - 2 * a.cost
         for t, n in nets.items():
