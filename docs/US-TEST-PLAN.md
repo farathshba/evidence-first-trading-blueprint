@@ -24,3 +24,12 @@
 - OOS (2022-26): VOID — 120 < 150 trades (genuine; gate-closed regime, not apparatus). No out-of-sample confirmation exists.
 - Apparatus: ZeroDivision guard added (commit 579dc30) after 2014 start exposed empty-breadth dates; breadth point-in-time fix from PR #22 confirmed working (56 vs 12 months in market).
 - Standing verdict: in-sample US microcap edge exists at conservative costs; replication NOT demonstrated out-of-sample. Next: pre-register Test 4.2 or accept VOID as final. Bars before runs, as always.
+
+## TEST 4.2 (registered 11 Oct 2026, pre-run): OOS gate widening
+- Motivation: 4.1 OOS VOID (120 < 150 trades, gate closed 45/57 months). Hypothesis: champion edge persists OOS when gate widening lifts OOS trades >= 150.
+- Widening rule (frozen): breadth gate threshold relaxed from top-decile (0.90) to top-quartile (0.75) of listed names. Chosen a priori from 4.1 diagnostics; NO variant search on OOS.
+- IS guard: IS (2014-21) run under widened gate must hold EV >= +0.60% with >= 150 trades, else apparatus void — widening may not buy trade count with signal quality.
+- OOS bars (single run, no iterations): EV > +0.60%, >= 150 trades, >= 3/5 positive OOS years.
+- VOID floor: OOS < 150 trades under widened gate -> FINAL VOID, US champion retired from further testing.
+- Costs: 0.35%/side primary; 0.55%/side stress run on the same frozen gate.
+- Sequence: IS run first (guard), then OOS run once, then stress. No edits between runs.
