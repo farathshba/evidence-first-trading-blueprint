@@ -37,6 +37,7 @@ def main():
     ap.add_argument('--breadth', type=float, default=0.5, help='breadth gate: fraction of universe above SMA200')
     ap.add_argument('--cost', type=float, default=0.35)
     ap.add_argument('--side', default='top', choices=['top','bottom'], help='rank side: top winners or bottom losers')
+    ap.add_argument('--rank-mode', default='ret', choices=['ret','near52w'], help='ranking signal: lookback return or nearness to 52w high')
     ap.add_argument('--top', type=int, default=10)
     ap.add_argument('--lookback', type=int, default=126)
     ap.add_argument('--min-price', type=float, default=1.0)
@@ -77,7 +78,7 @@ def main():
 
     dvol = (C * V).rolling(20).mean()
     elig = (C >= a.min_price) & (C <= a.max_price) & (dvol >= a.min_dvol) & A.notna()
-    r = A / A.shift(a.lookback) - 1.0
+    r = (A / A.rolling(252).max()) if a.rank_mode == 'near52w' else (A / A.shift(a.lookback) - 1.0)
     sma200 = A.rolling(200).mean()
     above = (A > sma200)
     listed = sma200.notna()

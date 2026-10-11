@@ -66,3 +66,9 @@
 - Stage 1 (full 2014-2026): EV > +0.60%/trade AND >= 6/13 positive years, >= 150 trades else VOID.
 - Stage 2 (walk-forward): OOS 2022-26 single run: EV > +0.60%, >= 3/5 positive years, >= 150 trades else VOID. No gate-widening reruns (4.2 precedent).
 - SURVIVORSHIP CAVEAT: screening-grade only. Bars before runs.
+
+## TEST 4.5 RESULTS (11 Oct 2026): Stage 1 PASS, Stage 2 VOID — candidate alive, unconfirmed
+- Full (near52w rank, top-10): BAR 1 PASS (+1.40% EV, 560 trades), BAR 2 PASS (7/13 years), maxDD -23.8% (mildest of all US variants).
+- Stress 0.55%/side: +1.00% EV, 6/13 years, maxDD -27.0% — cost-robust.
+- OOS (2022-26): VOID (120 < 150 trades, gate-closed regime). Readable subset: EV +0.69% (clears BAR 1) but 2/5 positive years (fails BAR 2) — edge concentrated 2025-26; 2026 = +1.34%.
+- Verdict: best-performing US candidate to date; survives stress; OOS unconfirmed by pre-registered terms. NOT promotable (survivorship caveat + no OOS confirmation). Retained for survivorship-free re-test if data is acquired.
