@@ -34,6 +34,7 @@ def load_spy(out_dir):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--data-dir', default='data_us')
+    ap.add_argument('--breadth', type=float, default=0.5, help='breadth gate: fraction of universe above SMA200')
     ap.add_argument('--cost', type=float, default=0.35)
     ap.add_argument('--top', type=int, default=10)
     ap.add_argument('--lookback', type=int, default=126)
@@ -98,7 +99,7 @@ def main():
         if i + 1 >= len(rdates):
             break
         d2 = rdates[i + 1]
-        if reg.loc[d] < 1 or breadth.loc[d] < 0.5:
+        if reg.loc[d] < 1 or breadth.loc[d] < a.breadth:
             monthly.append((d, 0.0, 0))
             continue
         e = elig.loc[d]

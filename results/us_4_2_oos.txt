@@ -1,0 +1,15 @@
+[diag] universe: 664 tickers, 3212 rows (2014-01-02..2026-10-09)
+[diag] SURVIVORSHIP CAVEAT APPLIES (today-only snapshot; PR #19, runbook section 2)
+
+=== TEST 4.1: US champion replication, costs 0.35%/side ===
+EV/trade: -0.14% | trades: 340 | positive years: 2/5 | maxDD (monthly eq): -52.1%
+months in market: 34/57 (gate-closed months flat)
+
+Year-by-year (portfolio monthly mean %):
+  2022:  +0.00%
+  2023:  -1.85%
+  2024:  +4.27%
+  2025:  +1.06%
+  2026:  -5.16%
+
+BAR 1 (EV > +0.6%): FAIL (-0.14%)

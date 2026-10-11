@@ -36,3 +36,10 @@
 
 ### TEST 4.2 AMENDMENT (pre-run, same day): threshold correction
 - Registration error caught pre-run: actual gate is breadth >= 0.50 (line: breadth.loc[d] < 0.5), not top-decile. Widening rule corrected to: 0.50 -> 0.40. No other terms changed. Recorded for audit honesty.
+
+## TEST 4.2 RESULTS (11 Oct 2026): OOS FAIL — champion retired from US testing
+- IS guard (breadth 0.40, 2014-21): PASS — EV +2.91%, 640 trades, 64/95 months in market.
+- OOS (2022-26, breadth 0.40): FAIL — EV -0.14% (bar: > +0.60%), 340 trades (VOID floor cleared — genuine verdict), 2/5 positive years (bar: >= 3/5), maxDD -52.1%.
+- Stress full-sample (0.55%/side, breadth 0.40): +1.46% EV but maxDD -60.1% — untradeable tail.
+- Final verdict: US microcap champion edge is IN-SAMPLE ONLY; does not persist out-of-sample at gate 0.50 or 0.40. RETIRED from US testing per pre-registered terms. No further gate variants.
+- Remaining honest caveats: survivorship bias inflates all figures (today-only universe); true OOS edge is <= the (already negative) numbers above.
