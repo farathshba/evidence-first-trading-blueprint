@@ -58,3 +58,17 @@
 - OOS arm (2022-26): VOID (120 < 150 trades); readable subset EV -2.33%, 1/5 positive years, worst year 2024 (-2.43%) = momentum champion best regime. Anti-correlation with momentum, consistent with SGX breakout tombstone.
 - Verdict: FAIL at Stage 1. No Stage 2 per registration. Short-term reversal does NOT survive long-only after 0.35%/side with regime gates. Tombstone: mean-reversion class fails on US microcaps (third market-wide tombstone after SGX 3.2/3.4).
 - Note: IS arm not run separately (Stage 1 failure ends test); full-sample year table covers the record.
+
+## TEST 4.5 (registered 11 Oct 2026, pre-run): 52-week-high momentum (George-Hwang), long-only
+- Motivation: distinct mechanism from the failed 126d return rank (anchoring nearness-to-52w-high vs trend). Literature: profits in 18/20 international markets, strongest in small stocks; counterpoint: Barroso-Wang find it subsumed by standard momentum in small caps. Last momentum-family US candidate.
+- Strategy: universe/gates/rebalance unchanged; rank = A / A.rolling(252).max() (nearness to 52-week high); buy TOP 10; monthly rebalance.
+- Costs: 0.35%/side primary, 0.55%/side stress.
+- Stage 1 (full 2014-2026): EV > +0.60%/trade AND >= 6/13 positive years, >= 150 trades else VOID.
+- Stage 2 (walk-forward): OOS 2022-26 single run: EV > +0.60%, >= 3/5 positive years, >= 150 trades else VOID. No gate-widening reruns (4.2 precedent).
+- SURVIVORSHIP CAVEAT: screening-grade only. Bars before runs.
+
+## TEST 4.5 RESULTS (11 Oct 2026): Stage 1 PASS, Stage 2 VOID — candidate alive, unconfirmed
+- Full (near52w rank, top-10): BAR 1 PASS (+1.40% EV, 560 trades), BAR 2 PASS (7/13 years), maxDD -23.8% (mildest of all US variants).
+- Stress 0.55%/side: +1.00% EV, 6/13 years, maxDD -27.0% — cost-robust.
+- OOS (2022-26): VOID (120 < 150 trades, gate-closed regime). Readable subset: EV +0.69% (clears BAR 1) but 2/5 positive years (fails BAR 2) — edge concentrated 2025-26; 2026 = +1.34%.
+- Verdict: best-performing US candidate to date; survives stress; OOS unconfirmed by pre-registered terms. NOT promotable (survivorship caveat + no OOS confirmation). Retained for survivorship-free re-test if data is acquired.
