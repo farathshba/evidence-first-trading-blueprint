@@ -43,3 +43,12 @@
 - Stress full-sample (0.55%/side, breadth 0.40): +1.46% EV but maxDD -60.1% — untradeable tail.
 - Final verdict: US microcap champion edge is IN-SAMPLE ONLY; does not persist out-of-sample at gate 0.50 or 0.40. RETIRED from US testing per pre-registered terms. No further gate variants.
 - Remaining honest caveats: survivorship bias inflates all figures (today-only universe); true OOS edge is <= the (already negative) numbers above.
+
+## TEST 4.3 (registered 11 Oct 2026, pre-run): short-term reversal, long-only
+- Motivation: strongest documented microcap anomaly (STREV ~2.04%/mo in microcaps, t=10.28); long-only leg = buying 21-day losers. SGX mean-reversion tombstones do NOT transfer automatically — US spread structure differs; this is an empirical question.
+- Strategy: universe unchanged (US$1-10, dvol >= US$3M); rank by 21-day return; buy BOTTOM 10 equal-weight; monthly rebalance; regime gates unchanged (SPY>SMA200, breadth>=0.50).
+- Primary costs 0.35%/side; stress 0.55%/side.
+- Stage 1 (full 2014-2026): EV > +0.60%/trade AND >= 6/13 positive years. VOID floor: < 150 trades.
+- Stage 2 (walk-forward): IS 2014-21 then untouched OOS 2022-26; OOS EV > +0.60% AND >= 3/5 positive OOS years. VOID floor: OOS < 150 trades -> VOID, no gate-widening reruns (4.2 precedent).
+- SURVIVORSHIP CAVEAT: screening-grade only; any Stage 2 pass requires re-run on survivorship-free data before promotion consideration.
+- Single OOS run, no edits between arms. Bars before runs.
