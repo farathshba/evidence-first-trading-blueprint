@@ -33,3 +33,6 @@
 - VOID floor: OOS < 150 trades under widened gate -> FINAL VOID, US champion retired from further testing.
 - Costs: 0.35%/side primary; 0.55%/side stress run on the same frozen gate.
 - Sequence: IS run first (guard), then OOS run once, then stress. No edits between runs.
+
+### TEST 4.2 AMENDMENT (pre-run, same day): threshold correction
+- Registration error caught pre-run: actual gate is breadth >= 0.50 (line: breadth.loc[d] < 0.5), not top-decile. Widening rule corrected to: 0.50 -> 0.40. No other terms changed. Recorded for audit honesty.
