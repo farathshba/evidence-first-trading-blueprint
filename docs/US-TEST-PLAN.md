@@ -87,3 +87,10 @@
 - Bars (frozen pre-run): Stage 1 full 2014-2026: mean window return > +0.30% NET of costs AND >= 6/13 positive years AND >= 100 windows, else VOID. Stage 2 OOS 2022-26 single run: mean > +0.30%, >= 3/5 positive years, >= 40 windows, else VOID. No reruns.
 - Reasoning for +0.30% bar: ~7-day hold vs ~21-day in prior tests; net bar implies ~+1.0% gross vs 0.70% round-trip friction — a real hurdle, not a giveaway.
 - SURVIVORSHIP CAVEAT: screening-grade only.
+
+## TEST 4.6 RESULTS (12 Oct 2026): Stage 1 PASS, Stage 2 FAIL — turn-of-month tombstoned
+- Apparatus note: initial run VOID due to volume-matrix index-alignment bug (row-number index vs calendar dates -> all volumes NaN); fixed loader, probed on 2026 subset before registered arms. No verdict was produced by the buggy run.
+- Full: BAR 1 PASS (+0.49% net/window, 152 windows), BAR 2 PASS (7/13 years). Stress 0.55%/side: +0.09% — edge is cost-fragile (margin ~= friction delta).
+- OOS 2022-26 (57 windows, valid sample): BAR 1 FAIL (-0.34% mean window), BAR 2 PASS (3/5). Negative mean = decisive fail, not a near-miss.
+- Verdict: FAIL at Stage 2 per pre-registered terms. Turn-of-month does not survive friction out-of-sample on this universe. Tombstone: seasonality class closed on US microcaps (screening-grade).
+- Diagnostic flag: 2026 window mean -9.45% is an extreme outlier (next-worst year -5.54%); appears to be genuine recent drawdown, not artifact — clean-data re-test (if purchased) can double-check incidentally. No rerun.
