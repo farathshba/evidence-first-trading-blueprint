@@ -1,0 +1,17 @@
+[diag] volume matrix: 1490332 valid cells (70% density)
+[diag] universe: 665 tickers, 3212 rows (2014-01-02..2026-10-09)
+[diag] SURVIVORSHIP CAVEAT APPLIES (today-only snapshot; PR #19)
+[diag] TOM trading days in sample: 406
+
+=== TEST 4.6: turn-of-month, costs 0.35%/side ===
+Mean window return (net): -0.34% | windows: 57 | positive years: 3/5
+
+Year-by-year (mean net window return %):
+  2022: -2.84%
+  2023: +2.65%
+  2024: +2.40%
+  2025: +3.28%
+  2026: -9.45%
+
+BAR 1 (mean window > +0.30% net): FAIL (-0.34% <= +0.30%)
+BAR 2 (>= 3/5 positive years): PASS
