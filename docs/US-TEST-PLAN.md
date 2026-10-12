@@ -79,3 +79,11 @@
 - Verdict: VOID-by-coverage, Test 3.6 precedent. No post-hoc bar-lowering or universe re-scoping after seeing results (4.2 precedent).
 - Revival condition (pre-declared, before any re-audit): a fund-excluded universe declared BEFORE the audit, and a source covering >=80% of it. Norgate (fund flags + point-in-time constituents) would satisfy declaration mechanics if the survivorship purchase happens. yfinance is otherwise adequate — 0 exceptions, 25-row depth on covered names.
 - Note: yfinance earnings dates are rich where present (up to 25 quarters, incl. EPS estimates) — viable signal source if the universe problem is solved upstream.
+
+## TEST 4.6 (registered 12 Oct 2026, pre-run): turn-of-month seasonality, long-only
+- Hypothesis: month-end cash flows (salaries, fund inflows) lift equities in a ~7-day window (last 4 + first 3 trading days of each month). Calendar effect, not a stock-selection edge.
+- Strategy: same price/dollar-volume universe; select top-10 by 20d avg dollar volume (liquidity only, no signal rank); hold ONLY during the window; cash otherwise. No regime gates (calendar mechanism is regime-agnostic — intentional deviation, registered).
+- Costs: 0.35%/side primary, 0.55%/side stress.
+- Bars (frozen pre-run): Stage 1 full 2014-2026: mean window return > +0.30% NET of costs AND >= 6/13 positive years AND >= 100 windows, else VOID. Stage 2 OOS 2022-26 single run: mean > +0.30%, >= 3/5 positive years, >= 40 windows, else VOID. No reruns.
+- Reasoning for +0.30% bar: ~7-day hold vs ~21-day in prior tests; net bar implies ~+1.0% gross vs 0.70% round-trip friction — a real hurdle, not a giveaway.
+- SURVIVORSHIP CAVEAT: screening-grade only.
