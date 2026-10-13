@@ -33,3 +33,8 @@
 - ES3 gate: **OPEN**
 - Top-10 momentum (126d, price>=1, dvol>=1M): PCT_SI (+120.5%), 558_SI (+64.1%), EB5_SI (+51.7%), BS6_SI (+28.5%), HBND_SI (+24.4%), CC3_SI (+7.8%), HSHD_SI (+6.8%), E28_SI (+4.2%), S58_SI (+4.2%), H78_SI (+0.3%)
 - Data: 556 ok / 42 failed
+
+## 2026-10-13
+- ES3 gate: **OPEN**
+- Top-10 momentum (126d, price>=1, dvol>=1M): PCT_SI (+107.9%), 558_SI (+57.5%), EB5_SI (+44.5%), BS6_SI (+27.8%), HBND_SI (+25.6%), HSHD_SI (+8.6%), CC3_SI (+6.8%), H78_SI (+2.8%), S58_SI (+2.5%), E28_SI (+1.3%)
+- Data: 565 ok / 33 failed
