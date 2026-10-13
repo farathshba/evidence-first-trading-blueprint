@@ -1,0 +1,32 @@
+=== TEST 4.5 SURVIVORSHIP-FREE RE-TEST (13 Oct 2026): Stage 1 CONFIRMED ===
+Apparatus: QuantConnect free tier (LEAN v2.5, AlgoSeek delisted-inclusive US equities),
+Python port of frozen 4.5 bars: near52w rank, top-10, monthly rebalance,
+gates SPY>SMA200 + breadth>=0.50, costs 0.35%/side (0.70% round-trip in ledger).
+
+Two stitched runs (free-tier constraints), SetWarmUp(200):
+  Run A (2014-01-02 -> 2020-07-01): trades=98,  EV +1.99%, pos 3/4 traded yrs, maxDD -11.2%
+    Y2014: n=34 EV=-2.16% | Y2016: n=31 EV=+2.08% | Y2017: n=24 EV=+5.88% | Y2018: n=9 EV=+6.96%
+  Run B (2020-07-01 -> 2026-07-16): trades=116, EV +6.20%, pos 4/5 traded yrs, maxDD -10.2%
+    Y2021: n=46 EV=+10.04% | Y2023: n=7 EV=-7.19% | Y2024: n=15 EV=+1.21% | Y2025: n=20 EV=+9.95% | Y2026: n=28 EV=+3.22%
+
+STITCHED (2014-01 -> 2026-07, registered window minus vendor cutoff):
+  EV/trade: +4.27% net (trade-weighted, 214 trades)
+  positive years: 7/13 (2016, 2017, 2018, 2021, 2024, 2025, 2026)
+  negative years: 2014 (-2.16%), 2023 (-7.19%)
+  gate-closed flat: 2015, 2019, 2020, 2022
+
+BARS (per PR #26 registration):
+  BAR 1 (EV > +0.60%):          PASS (+4.27%)
+  BAR 2 (>= 6/13 positive yrs): PASS (7/13)
+  BAR 3 (>= 150 trades):        PASS (214)
+
+CAVEATS (documented):
+  - AlgoSeek dataset ends 2026-07-15: final ~3 months of registered window untestable on QC.
+  - Boundary positions open at the 2020-07-01 split are uncounted in both halves (conservative).
+  - QC maxDD -10 to -11% (monthly equity) vs Yahoo -23.8%: universe-width effect, not comparable 1:1.
+  - QC counts trades via entry/exit ledger; original via portfolio monthly means — EV definitions
+    aligned (net per-trade after 0.70% round-trip), year classification identical method.
+
+VERDICT: First US candidate CONFIRMED on survivorship-free data. Zero spend.
+OOS arm (2022-26) remains VOID per original registration (gate-closed regime, 120<150).
+Promotion to paper/live is a separate owner decision — NOT taken here.
