@@ -94,3 +94,11 @@
 - OOS 2022-26 (57 windows, valid sample): BAR 1 FAIL (-0.34% mean window), BAR 2 PASS (3/5). Negative mean = decisive fail, not a near-miss.
 - Verdict: FAIL at Stage 2 per pre-registered terms. Turn-of-month does not survive friction out-of-sample on this universe. Tombstone: seasonality class closed on US microcaps (screening-grade).
 - Diagnostic flag: 2026 window mean -9.45% is an extreme outlier (next-worst year -5.54%); appears to be genuine recent drawdown, not artifact — clean-data re-test (if purchased) can double-check incidentally. No rerun.
+
+## TEST 4.5 SURVIVORSHIP-FREE RE-TEST (13 Oct 2026): Stage 1 CONFIRMED — QC/AlgoSeek
+- Apparatus: QuantConnect free tier, LEAN Python port of frozen bars (near52w, top-10, monthly, SPY>SMA200 + breadth>=0.50, 0.35%/side). AlgoSeek data includes delisted equities — survivorship caveat CLOSED.
+- Two stitched runs with SetWarmUp(200): A 2014-01→2020-06 (98 trades, +1.99%), B 2020-07→2026-07-15 (116 trades, +6.20%).
+- Stitched: EV +4.27% net, 214 trades, 7/13 positive years. ALL THREE BARS PASS.
+- Negative years honest on record: 2014 (-2.16%), 2023 (-7.19%). Gate-closed flat: 2015/19/20/22 — same trade-frequency profile as the original run; edge is NOT a survivorship artifact.
+- Caveats: data ends 2026-07-15 (vendor cutoff, ~3 mo short); boundary trades at split uncounted (conservative); see results/us_4_5_qc_survivorship_free.txt.
+- Verdict: first validated US candidate. OOS arm stays VOID per registration; walk-forward decision is a separate pre-registered owner call.
