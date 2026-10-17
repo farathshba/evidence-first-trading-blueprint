@@ -6,8 +6,8 @@
 # Frozen bars (registered 16 Oct, read AFTER both runs, no reruns):
 #   EV/trade > +0.60% @ 0.35%/side AND >= 6/13 positive years AND >= 150 trades
 #   AND conditioned EV >= baseline EV + 0.30pp — else no adoption.
-# Universe: US$1-10, 20d dollar-volume >= $3M, common equities, >= 260 trading days history.
-# Gates: SPY>SMA200 AND breadth>=0.50. Long-only, top-10, monthly rebalance (first trading day).
+# v3 17 Oct: fixed History-window bug (requested 253 bars but required >=260 -> every
+# candidate skipped, 0 trades in first run; window now 400 bars, requirement unchanged).
 
 from AlgorithmImports import *
 
@@ -22,7 +22,7 @@ COARSE_CAP = 500     # cost control for fine stage (pre-registered tradeoff)
 
 
 class PercentFeeModel(FeeModel):
-    ```0.35%/side percentage fee (registered cost assumption)```
+    "0.35%/side percentage fee (registered cost assumption)"
     def __init__(self, rate):
         self.rate = rate
 
@@ -74,7 +74,8 @@ class Us51AdrConditionedChampion(QCAlgorithm):
         candidates = []   # (symbol, nearness)
         for f in fine:
             s = f.Symbol
-            bars = self.History(s, 253, Resolution.Daily)
+            # v3 FIX: request 400 bars so the >=260-bar history requirement is satisfiable
+            bars = self.History(s, 400, Resolution.Daily)
             if bars.empty or len(bars) < 260:
                 continue
             closes = bars["close"].values
@@ -105,7 +106,7 @@ class Us51AdrConditionedChampion(QCAlgorithm):
         above = 0
         counted = 0
         for s, _ in candidates:
-            h = self.History(s, 200, Resolution.Daily)
+            h = self.History(s, 220, Resolution.Daily)
             if h.empty or len(h) < 200:
                 continue
             sma200 = float(h["close"].values.mean())
@@ -115,7 +116,7 @@ class Us51AdrConditionedChampion(QCAlgorithm):
         breadth_ok = counted > 0 and (above / counted) >= 0.50
 
         # SPY regime gate
-        sh = self.History(self.spy, 200, Resolution.Daily)
+        sh = self.History(self.spy, 220, Resolution.Daily)
         spy_ok = (not sh.empty) and len(sh) >= 200 and \
                  float(sh["close"].values[-1]) > float(sh["close"].values.mean())
 
