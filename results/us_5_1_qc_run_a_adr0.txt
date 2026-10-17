@@ -1,0 +1,35 @@
+US TEST 5.1 - QC CONFIRMATION - RUN A (ADR_MIN=0.0, baseline)
+Source: QuantConnect v5 algo (commit 5b2e56f), AlgoSeek survivorship-free daily data
+Period: 2016-08-02 .. 2026-07-18 (QC daily-data end)
+Cost model: 0.35%/side
+
+TOTAL TRADES: 276
+WIN RATE: 47.8% (132W/144L)
+NET P&L: +$44,276.46 (fees $19,993 deducted)
+EV/TRADE (net, P&L/notional): +1.55%
+
+YEARLY (net of fees):
+2016: 36 trades, 10W,  -$19,460  EV -6.54%
+2017: 29 trades, 21W,   +$9,436   EV +4.09%
+2018: 35 trades, 12W,   -$8,011   EV -2.73%
+2020: 20 trades, 13W,   +$34,515  EV +22.43%
+2021: 69 trades, 36W,   +$7,956   EV +0.95%
+2023: 10 trades, 0W,    -$10,347  EV -8.82%
+2024: 20 trades, 7W,    -$4,823   EV -2.23%
+2025: 33 trades, 22W,   +$17,647  EV +4.73%
+2026: 24 trades, 11W,   +$17,364  EV +5.28%
+Positive years: 5 of 9 with trades (no trades: 2019, 2022)
+
+SANITY CHECK vs PR #28 calibration (+4.27% EV, ~214 trades): FAIL
+- EV divergence 2.72pp (> 1pp threshold)
+- Trade count divergence +62
+
+CAVEATS / IMPLEMENTATION OBSERVATIONS:
+1. Multi-month flat gaps persist in v5 (Jul-Dec 2017, Nov 2018-Dec 2019,
+   Oct 2021-Jul 2023, Sep 2023-Jul 2024, Jan-Aug 2025). Some are legitimate
+   regime-gate-off periods (e.g. 2022), others (2017H2, mid-2023-mid-2024)
+   fall in bull regimes where gates should be on -> suspected FineSelection
+   month-rollover race still dropping rebalances.
+2. Entry prices are split-adjusted (e.g. AHT ~$5,499, CLEU ~$11,160,
+   AGEN ~$141) so the US$1-10 price filter selects on adjusted, not nominal,
+   price -> universe drift vs the Mac/Yahoo Stage 1 run.

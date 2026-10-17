@@ -1,0 +1,28 @@
+US TEST 5.1 - QC CONFIRMATION - RUN B (ADR_MIN=0.04, conditioned)
+Source: QuantConnect v5 algo (commit 5b2e56f), AlgoSeek survivorship-free daily data
+Period: 2016-08-02 .. 2026-07-18 (QC daily-data end)
+Cost model: 0.35%/side
+
+TOTAL TRADES: 197
+WIN RATE: 43.7% (86W/111L)
+NET P&L: +$3,673.76 (fees $11,087 deducted)
+EV/TRADE (net, P&L/notional): +0.23%
+
+YEARLY (net of fees):
+2016: 38 trades, 8W,   -$30,285  EV -10.21%
+2018: 26 trades, 9W,   -$7,222   EV -4.25%
+2020: 20 trades, 7W,   +$16,318  EV +14.96%
+2021: 56 trades, 28W,  +$4,302   EV +0.91%
+2025: 28 trades, 15W,  +$4,387   EV +1.81%
+2026: 29 trades, 19W,  +$16,174  EV +5.61%
+Positive years: 4 of 6 with trades (no trades: 2017, 2019, 2022, 2023, 2024)
+
+FROZEN BARS (registered 16 Oct 2026, read once after both runs):
+- EV/trade net > +0.60%: FAIL (+0.23%)
+- Positive years >= 6/13: FAIL (4 of 6 with trades)
+- Trades >= 150: PASS (197)
+- KEY BAR: Run B EV >= Run A EV + 0.30pp: FAIL
+  (Run B +0.23% vs required +1.85%; fails by 1.62pp, direction INVERTED)
+
+DRIVER: Aug-Nov 2016 high-ADR cohort loses -$30.3k (-10.2% EV) while the
+unconditioned run's lower-ADR names cushion the same period.
