@@ -7,9 +7,12 @@
 #   EV/trade > +0.60% @ 0.35%/side AND >= 6/13 positive years AND >= 150 trades
 #   AND conditioned EV >= baseline EV + 0.30pp — else no adoption.
 # v3 17 Oct: fixed History-window bug (253 requested vs 260 required -> 0 trades).
-# v4 17 Oct: guard OHLCV columns — some symbols return History frames without a
-# 'volume' column (QC KeyError 'No key found for either mapped or original key').
-# Such symbols are skipped with a Debug log; not a rule change, defensive I/O.
+# v4 17 Oct: guard OHLCV columns (KeyError on volume for some symbols) — skips logged.
+# v5 17 Oct: (1) position sizing 0.95/TOP_N to stop 'Insufficient buying power' order
+# rejections (execution plumbing; per-trade % EV and the 0.35% fee are size-independent;
+# identical in both runs so the A-vs-B key bar remains valid). (2) Replaced the scheduled
+# midnight rebalance flag (race with universe selection caused month-long no-trade gaps)
+# with deterministic month-rollover detection inside FineSelection.
 
 from AlgorithmImports import *
 
@@ -21,6 +24,7 @@ MAX_PRICE = 10.0
 MIN_DVOL = 3_000_000
 COST_PER_SIDE = 0.0035
 COARSE_CAP = 500     # cost control for fine stage (pre-registered tradeoff)
+SIZE_FACTOR = 0.95   # buying-power buffer (execution plumbing, v5)
 NEED_COLS = {"open", "high", "low", "close", "volume"}
 
 
@@ -48,11 +52,9 @@ class Us51AdrConditionedChampion(QCAlgorithm):
         self.Securities[self.spy].SetFeeModel(PercentFeeModel(COST_PER_SIDE))
 
         self.active = set()
-        self.rebalance_due = True   # first trading day counts as month start
+        self.last_sel_month = None   # v5: deterministic month-rollover detection
 
         self.AddUniverse(self.CoarseSelection, self.FineSelection)
-        self.Schedule.On(self.DateRules.MonthStart(), self.TimeRules.Midnight,
-                         lambda: setattr(self, "rebalance_due", True))
 
     def OnSecuritiesChanged(self, changes):
         # apply the registered percent fee model to every equity the universe adds
@@ -70,14 +72,15 @@ class Us51AdrConditionedChampion(QCAlgorithm):
         return [c.Symbol for c in selected[:COARSE_CAP]]
 
     def FineSelection(self, fine):
-        if not self.rebalance_due:
+        # v5: rebalance on the first selection of each new month (deterministic)
+        cur_month = (self.Time.year, self.Time.month)
+        if cur_month == self.last_sel_month:
             return list(self.active)            # keep holdings between rebalances
-        self.rebalance_due = False
+        self.last_sel_month = cur_month
 
         candidates = []   # (symbol, nearness)
         for f in fine:
             s = f.Symbol
-            # v3: request 400 bars so >=260-bar history requirement is satisfiable
             bars = self.History(s, 400, Resolution.Daily)
             if bars.empty or len(bars) < 260:
                 continue
@@ -142,7 +145,7 @@ class Us51AdrConditionedChampion(QCAlgorithm):
                 continue
             if s in self.Portfolio and self.Portfolio[s].Invested:
                 continue
-            self.SetHoldings(s, 1.0 / TOP_N)
+            self.SetHoldings(s, SIZE_FACTOR / TOP_N)
         # exits: liquidate held names that fell out of the selection
         for s in list(self.Portfolio.Keys):
             if s == self.spy:
