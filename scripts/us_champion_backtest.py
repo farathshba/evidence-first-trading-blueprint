@@ -43,11 +43,12 @@ def main():
     ap.add_argument('--min-price', type=float, default=1.0)
     ap.add_argument('--max-price', type=float, default=10.0)
     ap.add_argument('--min-dvol', type=float, default=3e6)
+    ap.add_argument('--min-adr', type=float, default=0.0, help='min 20d mean of (high-low)/close, e.g. 0.04 = 4%%')
     ap.add_argument('--start', default=None)
     ap.add_argument('--end', default=None)
     a = ap.parse_args()
 
-    adj, close, vol = {}, {}, {}
+    adj, close, vol, hi, lo = {}, {}, {}, {}, {}
     for f in sorted(glob.glob(os.path.join(a.data_dir, '*.csv'))):
         t = os.path.basename(f)[:-4]
         if t.startswith('_') or t.upper() in ('SPY',):
@@ -66,18 +67,26 @@ def main():
         c = df['close'].astype(float)
         v = df['volume'].astype(float)
         adjc = df['adj close'].astype(float) if 'adj close' in df.columns else c
+        h = df['high'].astype(float) if 'high' in df.columns else c
+        l = df['low'].astype(float) if 'low' in df.columns else c
         close[t] = c
+        hi[t] = h
+        lo[t] = l
         vol[t] = v
         adj[t] = adjc
 
     A = pd.DataFrame(adj).sort_index()
     C = pd.DataFrame(close).reindex(A.index)
     V = pd.DataFrame(vol).reindex(A.index)
+    H = pd.DataFrame(hi).reindex(A.index)
+    L = pd.DataFrame(lo).reindex(A.index)
     print(f"[diag] universe: {A.shape[1]} tickers, {A.shape[0]} rows ({A.index[0].date()}..{A.index[-1].date()})")
     print("[diag] SURVIVORSHIP CAVEAT APPLIES (today-only snapshot; PR #19, runbook section 2)")
 
     dvol = (C * V).rolling(20).mean()
-    elig = (C >= a.min_price) & (C <= a.max_price) & (dvol >= a.min_dvol) & A.notna()
+    adr = ((H - L) / C).rolling(20).mean()
+    print(f"[diag] ADR filter: min_adr={a.min_adr:.4f}")
+    elig = (C >= a.min_price) & (C <= a.max_price) & (dvol >= a.min_dvol) & A.notna() & (adr >= a.min_adr)
     r = (A / A.rolling(252).max()) if a.rank_mode == 'near52w' else (A / A.shift(a.lookback) - 1.0)
     sma200 = A.rolling(200).mean()
     above = (A > sma200)
