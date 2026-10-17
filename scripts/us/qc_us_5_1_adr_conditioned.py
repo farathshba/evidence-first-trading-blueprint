@@ -6,8 +6,10 @@
 # Frozen bars (registered 16 Oct, read AFTER both runs, no reruns):
 #   EV/trade > +0.60% @ 0.35%/side AND >= 6/13 positive years AND >= 150 trades
 #   AND conditioned EV >= baseline EV + 0.30pp — else no adoption.
-# v3 17 Oct: fixed History-window bug (requested 253 bars but required >=260 -> every
-# candidate skipped, 0 trades in first run; window now 400 bars, requirement unchanged).
+# v3 17 Oct: fixed History-window bug (253 requested vs 260 required -> 0 trades).
+# v4 17 Oct: guard OHLCV columns — some symbols return History frames without a
+# 'volume' column (QC KeyError 'No key found for either mapped or original key').
+# Such symbols are skipped with a Debug log; not a rule change, defensive I/O.
 
 from AlgorithmImports import *
 
@@ -19,6 +21,7 @@ MAX_PRICE = 10.0
 MIN_DVOL = 3_000_000
 COST_PER_SIDE = 0.0035
 COARSE_CAP = 500     # cost control for fine stage (pre-registered tradeoff)
+NEED_COLS = {"open", "high", "low", "close", "volume"}
 
 
 class PercentFeeModel(FeeModel):
@@ -74,9 +77,13 @@ class Us51AdrConditionedChampion(QCAlgorithm):
         candidates = []   # (symbol, nearness)
         for f in fine:
             s = f.Symbol
-            # v3 FIX: request 400 bars so the >=260-bar history requirement is satisfiable
+            # v3: request 400 bars so >=260-bar history requirement is satisfiable
             bars = self.History(s, 400, Resolution.Daily)
             if bars.empty or len(bars) < 260:
+                continue
+            # v4: skip symbols whose history frame lacks full OHLCV columns
+            if not NEED_COLS.issubset(bars.columns):
+                self.Debug(f"skip {s.Value}: incomplete history frame: {list(bars.columns)}")
                 continue
             closes = bars["close"].values
             highs = bars["high"].values
@@ -107,7 +114,7 @@ class Us51AdrConditionedChampion(QCAlgorithm):
         counted = 0
         for s, _ in candidates:
             h = self.History(s, 220, Resolution.Daily)
-            if h.empty or len(h) < 200:
+            if h.empty or len(h) < 200 or "close" not in h.columns:
                 continue
             sma200 = float(h["close"].values.mean())
             counted += 1
@@ -117,7 +124,7 @@ class Us51AdrConditionedChampion(QCAlgorithm):
 
         # SPY regime gate
         sh = self.History(self.spy, 220, Resolution.Daily)
-        spy_ok = (not sh.empty) and len(sh) >= 200 and \
+        spy_ok = (not sh.empty) and len(sh) >= 200 and "close" in sh.columns and \
                  float(sh["close"].values[-1]) > float(sh["close"].values.mean())
 
         if not spy_ok or not breadth_ok:
