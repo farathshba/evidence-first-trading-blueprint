@@ -33,6 +33,8 @@
 #   - Free tier 10KB log cap: compact summary only
 #   - Split runs: A: 2014-01-01..2020-06-30, B: 2020-07-01..2026-07-15.
 #     Boundary positions at the split are UNCOUNTED (conservative, 4.5 convention).
+#   - QC member-name lesson (18 Oct): NEVER assign self.<name> that shadows a
+#     QCAlgorithm member (self.universe, self.history both collide).
 #
 # RUN PROCEDURE (owner, QC web IDE or LEAN CLI):
 #   1. Create project, paste this file as main.py, set start/end per segment.
@@ -59,7 +61,9 @@ class UsTest53RsiFib(QCAlgorithm):
 
         # Universe: coarse + fine — price 1-10, dollar-volume >= 3M (coarse handles
         # both; fine just caps the count for free-tier headroom).
-        self.universe = self.add_universe(self._coarse, self._fine)
+        # FIX 18 Oct: self.universe collides with QCAlgorithm.Universe (IronPython
+        # member conversion error) — call add_universe WITHOUT assigning the result.
+        self.add_universe(self._coarse, self._fine)
 
         self.set_warm_up(300, Resolution.Daily)
 
