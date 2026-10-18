@@ -44,7 +44,7 @@ def main():
     ap.add_argument('--min-price', type=float, default=1.0)
     ap.add_argument('--max-price', type=float, default=10.0)
     ap.add_argument('--min-dvol', type=float, default=3e6)
-    ap.add_argument('--min-adr', type=float, default=0.0, help='min 20d mean of (high-low)/close, e.g. 0.04 = 4%')
+    ap.add_argument('--min-adr', type=float, default=0.0, help='min 20d mean of (high-low)/close, e.g. 0.04 = 4%%')
     ap.add_argument('--breakout', action='store_true', help='TEST 5.2: enter only if rebalance-day close is strictly above the 252d high')
     ap.add_argument('--start', default=None)
     ap.add_argument('--end', default=None)
