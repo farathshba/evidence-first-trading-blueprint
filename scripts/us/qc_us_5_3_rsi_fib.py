@@ -26,15 +26,17 @@
 #   4. REPORT: portfolio maxDD + max concurrent positions (informational)
 #   Verdict options: CONFIRMED / INVERTED (tombstone, survivorship artifact) / VOID.
 #
-# APPARATUS LESSONS BAKED IN (from the 5.1 port, PR #32):
+# APPARATUS LESSONS BAKED IN (from the 5.1 port, PR #32 + this port's hotfixes):
 #   - Use self.Securities[s].Close, NOT slice[s]
 #   - Guard None/0 close (OnData fires pre-bar at 00:00 for daily bars)
 #   - SetWarmUp(300, Daily) REQUIRED — verify first signal prints
 #   - Free tier 10KB log cap: compact summary only
 #   - Split runs: A: 2014-01-01..2020-06-30, B: 2020-07-01..2026-07-15.
 #     Boundary positions at the split are UNCOUNTED (conservative, 4.5 convention).
-#   - QC member-name lesson (18 Oct): NEVER assign self.<name> that shadows a
-#     QCAlgorithm member (self.universe, self.history both collide).
+#   - QC member-name lesson: NEVER assign self.<name> that shadows a QCAlgorithm
+#     member (self.universe collides).
+#   - Combined coarse+fine lesson: the coarse selector receives FUNDAMENTAL objects,
+#     not CoarseFundamental — use c.has_fundamental_data, NOT c.has_data.
 #
 # RUN PROCEDURE (owner, QC web IDE or LEAN CLI):
 #   1. Create project, paste this file as main.py, set start/end per segment.
@@ -59,10 +61,8 @@ class UsTest53RsiFib(QCAlgorithm):
         self.rsi_period = 14
         self.min_price, self.max_price, self.min_dvol = 1.0, 10.0, 3e6
 
-        # Universe: coarse + fine — price 1-10, dollar-volume >= 3M (coarse handles
-        # both; fine just caps the count for free-tier headroom).
-        # FIX 18 Oct: self.universe collides with QCAlgorithm.Universe (IronPython
-        # member conversion error) — call add_universe WITHOUT assigning the result.
+        # FIX 18 Oct: self.universe collides with QCAlgorithm.Universe — call
+        # add_universe WITHOUT assigning the result.
         self.add_universe(self._coarse, self._fine)
 
         self.set_warm_up(300, Resolution.Daily)
@@ -72,14 +72,16 @@ class UsTest53RsiFib(QCAlgorithm):
         self.entry_px = {}      # symbol -> entry price
         self.trades = []        # (exit_date, symbol, net_pct)
         self.in_flight = 0
-        self.max_conc_seen = 0  # FIX 18 Oct: tracked running max (was final value)
+        self.max_conc_seen = 0  # FIX 18 Oct: tracked running max
 
     # ---------- universe ----------
     def _coarse(self, coarse):
+        # FIX 18 Oct: combined coarse+fine selectors receive FUNDAMENTAL objects —
+        # the flag is has_fundamental_data, not CoarseFundamental.has_data.
         if self.is_warming_up:
             return Universe.UNCHANGED
         return [c.symbol for c in coarse
-                if c.has_data
+                if c.has_fundamental_data
                 and self.min_price <= c.adjusted_price <= self.max_price
                 and c.dollar_volume >= self.min_dvol]
 
