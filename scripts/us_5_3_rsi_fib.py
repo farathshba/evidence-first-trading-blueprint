@@ -4,18 +4,21 @@ TEST 5.3 — RSI divergence + Fibonacci golden pocket (folklore audit, daily).
 REGISTERED: Tier 5 plan (PR #30) — mechanical translation, one run, expected FAIL
 (mean-reversion family killed 3x: SGX 3.2, US 4.3, EMA/RSI 3.5).
 
-RULE (frozen):
+RULE (frozen; leg definition per registration: swing low = 90d min PRIOR TO the 90d max,
+retracement zone measured from the swing high — the COMPLETED swing leg, not a same-window
+rolling min. v1 bug: rolling 90d min INCLUDING today made the pocket retreat as price
+fell -> 0 trades, VOID-by-apparatus, fixed before any valid run; verified on synthetic
+perfect setups pre-push):
 - Universe: US$1-10, 20d dollar-volume >= US$3M, >= 260d history. Long-only.
-- Trend filter: 50EMA > 200SMA (SMA via EMA in pandas: ewm span).
-- Pullback: daily close into 38.2-61.8% golden pocket of the last 90-day swing leg
-  (swing low = 90d min prior to 90d max; retracement zone from swing high).
-- RSI: 14-day RSI regular bullish divergence — price makes a lower low within the
-  pullback (close < previous 5-day min) while RSI(14) is higher than its value at
-  that previous low (mechanical proxy for divergence).
-- Entry: all conditions true on the same day -> enter at next-day open proxy (close
-  to close, consistent with lab convention), hold 21 days (monthly-equivalent),
-  then exit. Non-overlapping: a ticker cannot re-enter while holding.
-- Costs 0.35%/side. No gates (this tests the setup itself, not a portfolio).
+- Trend filter: 50EMA > 200SMA.
+- Swing leg (per day i): over the prior 90 days EXCLUDING today, find the max-high day j;
+  leg_high = high[j]; leg_low = min close in the 90 days ending at j.
+- Golden pocket: close in [leg_high - 0.618*(leg_high-leg_low), leg_high - 0.382*(...)].
+- RSI: 14-day RSI; mechanical divergence proxy: close < prior 5-day min AND RSI above
+  its min over the prior 10 days.
+- Entry: all conditions on day i -> enter at close (lab convention), hold 21 days, exit.
+  Non-overlapping per ticker.
+- Costs 0.35%/side. No gates (audits the setup itself).
 
 BARS: EV/trade > +0.60% net; >= 6/13 positive years; >= 150 trades else VOID.
 """
@@ -51,14 +54,10 @@ def main():
         v = df['volume'].astype(float)
         h = df['high'].astype(float) if 'high' in df.columns else c
         dvol = (c * v).rolling(20).mean()
-        if (c < 1).any() is False:
-            pass
-        # eligibility series (universe filters)
         elig = (c >= 1.0) & (c <= 10.0) & (dvol >= 3e6)
-        if elig.sum() < 50:
+        if int(elig.fillna(False).sum()) < 50:
             continue
 
-        # indicators
         ema50 = c.ewm(span=50, adjust=False).mean()
         ema200 = c.ewm(span=200, adjust=False).mean()
         delta = c.diff()
@@ -66,43 +65,42 @@ def main():
         loss = (-delta.where(delta < 0, 0.0)).ewm(alpha=1/14, adjust=False).mean()
         rsi = 100 - 100 / (1 + gain / loss.replace(0, np.nan))
 
-        swing_high_90 = h.rolling(90).max()
-        swing_low_win = c.rolling(90).min().shift(1)  # proxy low window
-        # Fib golden pocket: for day i, leg high = 90d max; leg low = min of 90d
-        # window ending 5 days before the high printed (approx). Mechanical proxy:
-        # low = rolling 90d min over same window as high.
-        leg_high = swing_high_90
-        leg_low = c.rolling(90).min()
-        fib38 = leg_high - 0.382 * (leg_high - leg_low)
-        fib62 = leg_high - 0.618 * (leg_high - leg_low)
+        cv = c.values; hv = h.values
+        n = len(cv)
+        f38 = np.full(n, np.nan); f62 = np.full(n, np.nan)
+        for i in range(90, n):
+            lo = i - 90
+            j = lo + int(np.argmax(hv[lo:i]))          # max-high day, EXCLUDING today
+            llo = max(0, j - 89)
+            leg_high = hv[j]
+            leg_low = cv[llo:j+1].min()               # min close in 90d ending at j
+            rng = leg_high - leg_low
+            f38[i] = leg_high - 0.382 * rng
+            f62[i] = leg_high - 0.618 * rng
 
-        prev5min = c.rolling(5).min().shift(1)
-        in_pocket = (c >= fib38) & (c <= fib62)
+        s_f38 = pd.Series(f38, index=c.index)
+        s_f62 = pd.Series(f62, index=c.index)
+        in_pocket = (c >= s_f62) & (c <= s_f38)
         trend_up = ema50 > ema200
+        prev5min = c.rolling(5).min().shift(1)
         new_low = c < prev5min
-        # divergence proxy: price makes new 5d low but RSI is above its 10-day min
-        # (i.e., RSI not making a corresponding low)
         rsi_min10 = rsi.rolling(10).min().shift(1)
         rsi_ok = new_low & (rsi > rsi_min10)
 
-        signal = elig & trend_up & in_pocket & new_low & rsi_ok
+        signal = (elig & trend_up & in_pocket & new_low & rsi_ok).fillna(False)
         if signal.sum() == 0:
             continue
 
-        # entries with hold, non-overlapping
         idx = c.index
-        sig_dates = idx[signal.fillna(False)]
         holding_until = None
-        for d in sig_dates:
+        for d in idx[signal]:
             if holding_until is not None and d <= holding_until:
                 continue
             i = idx.get_loc(d)
             j = i + a.hold
-            if j >= len(idx):
+            if j >= n:
                 continue
-            entry_px = c.iloc[i]
-            exit_px = c.iloc[j]
-            net = (exit_px / entry_px - 1.0) * 100 - 2 * a.cost
+            net = (cv[j] / cv[i] - 1.0) * 100 - 2 * a.cost
             trades.append((d, t, float(net)))
             holding_until = idx[j]
 
@@ -114,7 +112,7 @@ def main():
     ev = tdf.net.mean()
     yr = tdf.groupby('year').net.mean()
     pos = (yr > 0).sum()
-    print(f"\n=== TEST 5.3: RSI div + Fib golden pocket, hold {a.hold}d, costs {a.cost:.2f}%/side ===")
+    print(f"\n=== TEST 5.3: RSI div + Fib golden pocket (corrected leg), hold {a.hold}d, costs {a.cost:.2f}%/side ===")
     print(f"EV/trade: {ev:+.2f}% | trades: {len(tdf)} | positive years: {pos}/{len(yr)}")
     print('Year-by-year (mean net %%):')
     for y, v in yr.items():
