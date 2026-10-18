@@ -122,8 +122,8 @@ def main():
         sel = rr.sort_values(ascending=(a.side == 'bottom')).head(a.top)
         if a.breakout:
             # TEST 5.2 registered rule: enter only if rebalance-day close is strictly
-            # above the 252-day high (both on the same nominal close series C).
-            hh = C.rolling(252).max().loc[d]
+            # above the high of the PRIOR 252 days (excluding rebalance day itself).
+            hh = C.rolling(252).max().shift(1).loc[d]
             ok = C.loc[d, sel.index] > hh.loc[sel.index]
             sel = sel[ok.fillna(False)]  # unfilled slots stay empty — no substitutes
         rets = A.loc[d2, sel.index] / A.loc[d, sel.index] - 1.0
@@ -141,7 +141,7 @@ def main():
     dd = (eq / eq.cummax() - 1).min() if len(m) else float('nan')
     pos_years = (yr > 0).sum()
 
-    print(f"\n=== TEST 5.2: breakout-trigger (close > 252d high), costs {a.cost:.2f}%/side ===")
+    print(f"\n=== TEST 5.2: breakout-trigger (close > prior-252d high), costs {a.cost:.2f}%/side ===")
     print(f"EV/trade: {ev:+.2f}% | trades: {len(tdf)} | positive years: {pos_years}/{len(yr)} | maxDD (monthly eq): {dd*100:.1f}%")
     gate_open = m[m.n > 0]
     print(f"months in market: {len(gate_open)}/{len(m)} (gate-closed months flat)")
