@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
-# QUANTCONNECT LEAN — US Test 5.3 QC CONFIRMATION PORT v3 (RSI div + Fib golden pocket)
+# QUANTCONNECT LEAN — US Test 5.3 QC CONFIRMATION PORT v4 (RSI div + Fib golden pocket)
 #
-# v3 (20 Oct): REMOVE self.history() ENTIRELY. v2 stalled twice at the SAME 15% mark
-# (~2h+ total) -> deterministic wall, not throttling variance. Remaining suspect: the
-# per-symbol seeding history requests (one per new universe member, hundreds total)
-# wedging the cloud run at the same date. v3 uses ZERO history API calls: windows are
-# built purely from daily slice bars, appended one per day, INCLUDING during warm-up
-# (warm-up feed fills the 291-bar caches; trading still disabled until warm-up ends).
-# Signal math (_signal/_ema/_rsi_series) byte-identical to v1/v2. Universe cap 200
-# (restored; [:100] variant never got a clean comparison, and 100 is kept as fallback).
-# Apparatus log: v1 stalled (per-day history x200, zero progress); v2 stalled at 15% x2
-# (seeding history pulls suspected); v3 = no history calls at all. No v1/v2/v3 run
-# consumed bars (all stalled pre-trade; zero trades).
+# v4 (20 Oct): ROOT CAUSE FOUND from the terminated v2 run's exit log: "Processing total
+# of 35,224,058 data points" to reach 2014-01-06 (4 trading days) = ~9M points/day ->
+# the universe/equities were running at MINUTE resolution (QC default), ~500x the
+# intended daily workload. All v1/v2/v3 "stalls" were minute-data grind, not logic.
+# v4 fix: self.universe_settings.resolution = Resolution.Daily (one line, plus leverage
+# 1.0). No other changes; v3 slice-only window build retained. Registered note: no
+# prior run consumed bars (all terminated pre-trade; TRADES 0 in the v2 exit log).
+# QC-port checklist lesson: ALWAYS set universe resolution explicitly — default Minute.
+#
+# v3 (20 Oct): REMOVE self.history() ENTIRELY. Windows are built purely from daily
+# slice bars, appended one per day, INCLUDING during warm-up. Signal math
+# (_signal/_ema/_rsi_series) byte-identical to v1/v2. Universe cap 200.
 #
 # FROZEN RULE (identical): US$1-10, dvol>=US$3M; EMA50>EMA200; swing leg = prior 90d
 # max-high day j, leg_low = min close of 90d ending at j; close in golden pocket
@@ -27,9 +28,12 @@ from collections import deque
 import numpy as np
 
 
-class UsTest53RsiFibV3(QCAlgorithm):
+class UsTest53RsiFibV4(QCAlgorithm):
 
     def initialize(self):
+        # v4: force DAILY universe/security data (QC default is Minute -> 35M points in 4 days)
+        self.universe_settings.resolution = Resolution.Daily
+        self.universe_settings.leverage = 1.0
         self.set_start_date(2014, 1, 1)   # SEGMENT A; B: 2020-07-01..2026-07-15
         self.set_end_date(2020, 6, 30)
         self.set_cash(100000)
@@ -66,7 +70,7 @@ class UsTest53RsiFibV3(QCAlgorithm):
         # NOTE: fine is not order-guaranteed; cap kept for free-tier headroom.
         return [f.symbol for f in fine][:200]
 
-    # ---------- helpers (identical math to v1/v2) ----------
+    # ---------- helpers (identical math to v1/v2/v3) ----------
     def _ema(self, closes, span):
         a = 2.0 / (span + 1)
         e = closes[0]
@@ -119,7 +123,7 @@ class UsTest53RsiFibV3(QCAlgorithm):
 
     # ---------- main loop ----------
     def on_data(self, slice):
-        # v3: collect bars ALWAYS (incl. warm-up) — no history API anywhere.
+        # v3/v4: collect bars ALWAYS (incl. warm-up) — no history API anywhere.
         for s in self.active_securities.keys():
             bar = slice.get(s)
             if bar is None:
