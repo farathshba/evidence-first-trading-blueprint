@@ -1,33 +1,33 @@
 #!/usr/bin/env python3
-# QUANTCONNECT LEAN — US Test 5.3 QC CONFIRMATION PORT v2 (RSI div + Fib golden pocket)
+# QUANTCONNECT LEAN — US Test 5.3 QC CONFIRMATION PORT v3 (RSI div + Fib golden pocket)
 #
-# v2 (19 Oct): PERFORMANCE REFACTOR — same frozen rule and bars as v1, logic UNTOUCHED.
-# v1 pulled self.history([s], 291) for every symbol every day (~200 reqs/day -> the
-# free-tier run stalled with no date progress). v2 maintains a ROLLING WINDOW cache:
-# one history pull per symbol on first sight, then one bar appended per day via the
-# daily slice. Same 291-bar signal input, same _signal() math, byte-for-byte rules.
-# Apparatus note logged: this is an efficiency fix to an apparatus bug (stall), not a
-# rule change — v1 run consumed no bars (stalled in warm-up, zero trades).
+# v3 (20 Oct): REMOVE self.history() ENTIRELY. v2 stalled twice at the SAME 15% mark
+# (~2h+ total) -> deterministic wall, not throttling variance. Remaining suspect: the
+# per-symbol seeding history requests (one per new universe member, hundreds total)
+# wedging the cloud run at the same date. v3 uses ZERO history API calls: windows are
+# built purely from daily slice bars, appended one per day, INCLUDING during warm-up
+# (warm-up feed fills the 291-bar caches; trading still disabled until warm-up ends).
+# Signal math (_signal/_ema/_rsi_series) byte-identical to v1/v2. Universe cap 200
+# (restored; [:100] variant never got a clean comparison, and 100 is kept as fallback).
+# Apparatus log: v1 stalled (per-day history x200, zero progress); v2 stalled at 15% x2
+# (seeding history pulls suspected); v3 = no history calls at all. No v1/v2/v3 run
+# consumed bars (all stalled pre-trade; zero trades).
 #
-# FROZEN RULE (identical to Mac v2 / v1): US$1-10, dvol>=US$3M; EMA50>EMA200; swing leg
-# = prior 90d max-high day j, leg_low = min close of 90d ending at j; close in golden
-# pocket 38.2-61.8%; RSI(14) Wilder div proxy (new 5d low, RSI > 10d min); entry at
-# close, hold 21 trading days, non-overlapping; costs applied in ledger (-2x0.35%).
+# FROZEN RULE (identical): US$1-10, dvol>=US$3M; EMA50>EMA200; swing leg = prior 90d
+# max-high day j, leg_low = min close of 90d ending at j; close in golden pocket
+# 38.2-61.8%; RSI(14) Wilder div proxy (new 5d low, RSI > 10d min); entry at close,
+# hold 21 trading days, non-overlapping; costs in ledger (-2x0.35%).
 #
 # FROZEN BARS (read once): EV > +0.60% net; >= 6/13 positive years; >= 150 trades else
-# VOID; REPORT maxDD + MAX_CONC (informational). CONFIRMED / INVERTED / VOID.
-#
+# VOID; REPORT MAX_CONC (informational). CONFIRMED / INVERTED / VOID.
 # Segments: A 2014-01-01..2020-06-30, B 2020-07-01..2026-07-15 (boundary uncounted).
-# QC lessons baked in: no self.<name> shadowing QCAlgorithm members; combined
-# coarse+fine selectors get Fundamental objects (has_fundamental_data); Securities
-# close with None guard; SetWarmUp(300, Daily); compact logging (10KB cap).
 
 from AlgorithmImports import *
 from collections import deque
 import numpy as np
 
 
-class UsTest53RsiFibV2(QCAlgorithm):
+class UsTest53RsiFibV3(QCAlgorithm):
 
     def initialize(self):
         self.set_start_date(2014, 1, 1)   # SEGMENT A; B: 2020-07-01..2026-07-15
@@ -39,9 +39,10 @@ class UsTest53RsiFibV2(QCAlgorithm):
         self.cost_side = 0.0035
         self.rsi_period = 14
         self.min_price, self.max_price, self.min_dvol = 1.0, 10.0, 3e6
-        self.win_len = 291   # rolling window per symbol (90 leg + 200 EMA + 1 today)
+        self.win_len = 291
 
         self.add_universe(self._coarse, self._fine)
+        # 300 warm-up days: fills the 291-bar windows BEFORE trading starts.
         self.set_warm_up(300, Resolution.Daily)
 
         self.exit_at = {}
@@ -49,10 +50,8 @@ class UsTest53RsiFibV2(QCAlgorithm):
         self.trades = []
         self.in_flight = 0
         self.max_conc_seen = 0
-        # v2 rolling caches
-        self.closes = {}   # symbol -> deque of closes (oldest..latest, incl. today)
-        self.highs = {}    # symbol -> deque of highs
-        self.seeded = set()
+        self.closes = {}   # symbol -> deque (oldest..latest)
+        self.highs = {}
 
     # ---------- universe ----------
     def _coarse(self, coarse):
@@ -64,9 +63,10 @@ class UsTest53RsiFibV2(QCAlgorithm):
                 and c.dollar_volume >= self.min_dvol]
 
     def _fine(self, fine):
+        # NOTE: fine is not order-guaranteed; cap kept for free-tier headroom.
         return [f.symbol for f in fine][:200]
 
-    # ---------- helpers (identical math to v1) ----------
+    # ---------- helpers (identical math to v1/v2) ----------
     def _ema(self, closes, span):
         a = 2.0 / (span + 1)
         e = closes[0]
@@ -119,34 +119,20 @@ class UsTest53RsiFibV2(QCAlgorithm):
 
     # ---------- main loop ----------
     def on_data(self, slice):
-        if self.is_warming_up:
-            return
-
-        # --- v2: update rolling caches from the daily slice (one bar per symbol) ---
+        # v3: collect bars ALWAYS (incl. warm-up) — no history API anywhere.
         for s in self.active_securities.keys():
-            if s not in self.seeded:
-                hist = self.history([s], self.win_len, Resolution.Daily)
-                if hist is None or hist.empty:
-                    continue
-                try:
-                    if isinstance(hist.index, MultiIndex):
-                        c = hist.loc[str(s)]["close"].values
-                        h = hist.loc[str(s)]["high"].values
-                    else:
-                        c = hist["close"].values
-                        h = hist["high"].values
-                except Exception:
-                    continue
-                if len(c) == 0:
-                    continue
-                self.closes[s] = deque(c.tolist(), maxlen=self.win_len)
-                self.highs[s] = deque(h.tolist(), maxlen=self.win_len)
-                self.seeded.add(s)
-                continue  # history() excludes today's bar; today appended below
             bar = slice.get(s)
-            if bar is not None:
+            if bar is None:
+                continue
+            if s in self.closes:
                 self.closes[s].append(float(bar.close))
                 self.highs[s].append(float(bar.high))
+            else:
+                self.closes[s] = deque([float(bar.close)], maxlen=self.win_len)
+                self.highs[s] = deque([float(bar.high)], maxlen=self.win_len)
+
+        if self.is_warming_up:
+            return  # windows filling; no trading during warm-up
 
         # --- exits first (21-day hold) ---
         for s in list(self.exit_at.keys()):
@@ -168,7 +154,7 @@ class UsTest53RsiFibV2(QCAlgorithm):
                 continue
             cl = self.closes[s]
             if len(cl) < self.win_len:
-                continue
+                continue  # symbol newer than 291 days in cache
             c_arr = np.fromiter(cl, dtype=float)
             h_arr = np.fromiter(self.highs[s], dtype=float)
             if np.isnan(c_arr).any():
