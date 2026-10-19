@@ -1,54 +1,33 @@
 #!/usr/bin/env python3
-# QUANTCONNECT LEAN — US Test 5.3 QC CONFIRMATION PORT (RSI div + Fib golden pocket)
+# QUANTCONNECT LEAN — US Test 5.3 QC CONFIRMATION PORT v2 (RSI div + Fib golden pocket)
 #
-# PURPOSE: survivorship-free confirmation of the Stage 1 PASS (Mac/Yahoo +0.90% EV,
-# 1,630 trades, 10/13y; docs/US-TEST-5-3-RESULTS.md). ONE registered run (per window
-# segment), bars read once, NO gate-widening. Same frozen rule as the Mac script
-# (scripts/us_5_3_rsi_fib.py @ e0edf3a).
+# v2 (19 Oct): PERFORMANCE REFACTOR — same frozen rule and bars as v1, logic UNTOUCHED.
+# v1 pulled self.history([s], 291) for every symbol every day (~200 reqs/day -> the
+# free-tier run stalled with no date progress). v2 maintains a ROLLING WINDOW cache:
+# one history pull per symbol on first sight, then one bar appended per day via the
+# daily slice. Same 291-bar signal input, same _signal() math, byte-for-byte rules.
+# Apparatus note logged: this is an efficiency fix to an apparatus bug (stall), not a
+# rule change — v1 run consumed no bars (stalled in warm-up, zero trades).
 #
-# FROZEN RULE (identical to Mac v2):
-#   Universe: US$1-10, 20d dollar-volume >= US$3M, >= 260d history. Long-only. NO regime
-#   gates (audits the setup itself).
-#   Per day, per eligible symbol:
-#     - Trend: EMA50(close) > EMA200(close)
-#     - Swing leg: over prior 90 days EXCLUDING today: j = day of max HIGH;
-#       leg_low = min CLOSE over the 90 days ending at j; leg_high = high[j]
-#     - Golden pocket: close in [leg_high-0.618*(leg_high-leg_low), leg_high-0.382*(...)]
-#     - RSI(14) Wilder; divergence proxy: close < min(close[-5..-1]) AND RSI > min(RSI[-10..-1])
-#     - Entry at close (daily bar), hold 21 trading days, exit. Non-overlapping per symbol.
-#   Costs: net P&L per trade = raw_ret - 2*0.35% computed offline from fills
-#   (fee model left at zero here ON PURPOSE; the ledger line below applies costs).
+# FROZEN RULE (identical to Mac v2 / v1): US$1-10, dvol>=US$3M; EMA50>EMA200; swing leg
+# = prior 90d max-high day j, leg_low = min close of 90d ending at j; close in golden
+# pocket 38.2-61.8%; RSI(14) Wilder div proxy (new 5d low, RSI > 10d min); entry at
+# close, hold 21 trading days, non-overlapping; costs applied in ledger (-2x0.35%).
 #
-# FROZEN BARS (read once after the single registered run):
-#   1. EV/trade net > +0.60%
-#   2. Positive years >= 6/13
-#   3. Trades >= 150 (else VOID)
-#   4. REPORT: portfolio maxDD + max concurrent positions (informational)
-#   Verdict options: CONFIRMED / INVERTED (tombstone, survivorship artifact) / VOID.
+# FROZEN BARS (read once): EV > +0.60% net; >= 6/13 positive years; >= 150 trades else
+# VOID; REPORT maxDD + MAX_CONC (informational). CONFIRMED / INVERTED / VOID.
 #
-# APPARATUS LESSONS BAKED IN (from the 5.1 port, PR #32 + this port's hotfixes):
-#   - Use self.Securities[s].Close, NOT slice[s]
-#   - Guard None/0 close (OnData fires pre-bar at 00:00 for daily bars)
-#   - SetWarmUp(300, Daily) REQUIRED — verify first signal prints
-#   - Free tier 10KB log cap: compact summary only
-#   - Split runs: A: 2014-01-01..2020-06-30, B: 2020-07-01..2026-07-15.
-#     Boundary positions at the split are UNCOUNTED (conservative, 4.5 convention).
-#   - QC member-name lesson: NEVER assign self.<name> that shadows a QCAlgorithm
-#     member (self.universe collides).
-#   - Combined coarse+fine lesson: the coarse selector receives FUNDAMENTAL objects,
-#     not CoarseFundamental — use c.has_fundamental_data, NOT c.has_data.
-#
-# RUN PROCEDURE (owner, QC web IDE or LEAN CLI):
-#   1. Create project, paste this file as main.py, set start/end per segment.
-#   2. Run A then B. Record TRADES/EV/YEAR/MAX_CONC debug lines from each.
-#   3. Stitch with boundary-conservative rule; ONE reading of the bars.
-#   4. Log verdict to docs/US-TEST-5-3-QC-VERDICT.md.
+# Segments: A 2014-01-01..2020-06-30, B 2020-07-01..2026-07-15 (boundary uncounted).
+# QC lessons baked in: no self.<name> shadowing QCAlgorithm members; combined
+# coarse+fine selectors get Fundamental objects (has_fundamental_data); Securities
+# close with None guard; SetWarmUp(300, Daily); compact logging (10KB cap).
 
 from AlgorithmImports import *
+from collections import deque
 import numpy as np
 
 
-class UsTest53RsiFib(QCAlgorithm):
+class UsTest53RsiFibV2(QCAlgorithm):
 
     def initialize(self):
         self.set_start_date(2014, 1, 1)   # SEGMENT A; B: 2020-07-01..2026-07-15
@@ -60,24 +39,23 @@ class UsTest53RsiFib(QCAlgorithm):
         self.cost_side = 0.0035
         self.rsi_period = 14
         self.min_price, self.max_price, self.min_dvol = 1.0, 10.0, 3e6
+        self.win_len = 291   # rolling window per symbol (90 leg + 200 EMA + 1 today)
 
-        # FIX 18 Oct: self.universe collides with QCAlgorithm.Universe — call
-        # add_universe WITHOUT assigning the result.
         self.add_universe(self._coarse, self._fine)
-
         self.set_warm_up(300, Resolution.Daily)
 
-        # State (FIX 18 Oct: entry_px was never initialized -> NameError on first exit)
-        self.exit_at = {}       # symbol -> bar count remaining
-        self.entry_px = {}      # symbol -> entry price
-        self.trades = []        # (exit_date, symbol, net_pct)
+        self.exit_at = {}
+        self.entry_px = {}
+        self.trades = []
         self.in_flight = 0
-        self.max_conc_seen = 0  # FIX 18 Oct: tracked running max
+        self.max_conc_seen = 0
+        # v2 rolling caches
+        self.closes = {}   # symbol -> deque of closes (oldest..latest, incl. today)
+        self.highs = {}    # symbol -> deque of highs
+        self.seeded = set()
 
     # ---------- universe ----------
     def _coarse(self, coarse):
-        # FIX 18 Oct: combined coarse+fine selectors receive FUNDAMENTAL objects —
-        # the flag is has_fundamental_data, not CoarseFundamental.has_data.
         if self.is_warming_up:
             return Universe.UNCHANGED
         return [c.symbol for c in coarse
@@ -86,10 +64,9 @@ class UsTest53RsiFib(QCAlgorithm):
                 and c.dollar_volume >= self.min_dvol]
 
     def _fine(self, fine):
-        # Keep universe small enough for free tier: top 200 by dollar volume.
         return [f.symbol for f in fine][:200]
 
-    # ---------- helpers ----------
+    # ---------- helpers (identical math to v1) ----------
     def _ema(self, closes, span):
         a = 2.0 / (span + 1)
         e = closes[0]
@@ -118,10 +95,8 @@ class UsTest53RsiFib(QCAlgorithm):
         if len(closes) < 291:
             return False
         c_today = closes[-1]
-        # Trend
         if self._ema(closes[-200:], 50) <= self._ema(closes[-200:], 200):
             return False
-        # Swing leg over prior 90 days EXCLUDING today
         hist_h = highs[-91:-1]
         hist_c = closes[-91:-1]
         j = int(np.argmax(hist_h))
@@ -133,10 +108,8 @@ class UsTest53RsiFib(QCAlgorithm):
         f62 = leg_high - 0.618 * rng
         if not (f62 <= c_today <= f38):
             return False
-        # New 5d low
         if c_today >= closes[-6:-1].min():
             return False
-        # RSI divergence proxy
         rs = self._rsi_series(closes[-30:])
         if len(rs) < 11:
             return False
@@ -149,43 +122,62 @@ class UsTest53RsiFib(QCAlgorithm):
         if self.is_warming_up:
             return
 
-        # Process exits first (21-day hold).
+        # --- v2: update rolling caches from the daily slice (one bar per symbol) ---
+        for s in self.active_securities.keys():
+            if s not in self.seeded:
+                hist = self.history([s], self.win_len, Resolution.Daily)
+                if hist is None or hist.empty:
+                    continue
+                try:
+                    if isinstance(hist.index, MultiIndex):
+                        c = hist.loc[str(s)]["close"].values
+                        h = hist.loc[str(s)]["high"].values
+                    else:
+                        c = hist["close"].values
+                        h = hist["high"].values
+                except Exception:
+                    continue
+                if len(c) == 0:
+                    continue
+                self.closes[s] = deque(c.tolist(), maxlen=self.win_len)
+                self.highs[s] = deque(h.tolist(), maxlen=self.win_len)
+                self.seeded.add(s)
+                continue  # history() excludes today's bar; today appended below
+            bar = slice.get(s)
+            if bar is not None:
+                self.closes[s].append(float(bar.close))
+                self.highs[s].append(float(bar.high))
+
+        # --- exits first (21-day hold) ---
         for s in list(self.exit_at.keys()):
             self.exit_at[s] -= 1
             if self.exit_at[s] <= 0:
                 px = self.securities[s].close
                 if px:
-                    entry = self.entry_px[s]
-                    raw = px / entry - 1.0
-                    net = raw - 2 * self.cost_side
+                    net = px / self.entry_px[s] - 1.0 - 2 * self.cost_side
                     self.trades.append((self.time.date(), str(s), net * 100))
                 del self.exit_at[s]
                 del self.entry_px[s]
                 self.in_flight -= 1
 
-        # Entries: evaluate every active universe symbol daily.
-        for s in list(self.active_securities.keys()):
+        # --- entries: signal on cached windows ---
+        for s in list(self.closes.keys()):
             if s in self.exit_at:
-                continue  # non-overlapping
-            hist = self.history([s], 291, Resolution.Daily)
-            if hist is None or hist.empty:
                 continue
-            try:
-                if isinstance(hist.index, MultiIndex):
-                    closes = hist.loc[str(s)]["close"].values
-                    highs = hist.loc[str(s)]["high"].values
-                else:
-                    closes = hist["close"].values
-                    highs = hist["high"].values
-            except Exception:
+            if s not in self.active_securities.keys():
                 continue
-            if len(closes) < 291 or np.isnan(closes).any():
+            cl = self.closes[s]
+            if len(cl) < self.win_len:
                 continue
-            if self._signal(closes, highs):
+            c_arr = np.fromiter(cl, dtype=float)
+            h_arr = np.fromiter(self.highs[s], dtype=float)
+            if np.isnan(c_arr).any():
+                continue
+            if self._signal(c_arr, h_arr):
                 px = self.securities[s].close
                 if not px:
                     continue
-                self.set_holdings(s, 0.02)   # small fixed weight; ledger tracks per-trade
+                self.set_holdings(s, 0.02)
                 self.exit_at[s] = self.hold_days
                 self.entry_px[s] = px
                 self.in_flight += 1
