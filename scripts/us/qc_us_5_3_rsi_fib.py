@@ -1,18 +1,14 @@
 #!/usr/bin/env python3
-# QUANTCONNECT LEAN — US Test 5.3 QC CONFIRMATION PORT v5 (RSI div + Fib golden pocket)
+# QUANTCONNECT LEAN — US Test 5.3 QC CONFIRMATION PORT v6 (RSI div + Fib golden pocket)
 #
-# v5 (20 Oct): LOG-CAP MITIGATION. v4 segment A ran CLEAN to completion (root cause
-# fixed: daily resolution) but the free-tier 10KB log cap was consumed by margin-error
-# spam (Insufficient buying power from late 2016 onward; 2% x ~50 concurrent = 100%
-# equity), so the TRADES/EV/YEAR/MAX_CONC summary was never written. Fix: set_cash
-# 10,000,000 (order rejections disappear; log stays quiet; summary survives the cap).
-# LEDGER UNAFFECTED: per-trade EV is price-based (entry/exit prices, -2x0.35%), not
-# portfolio-based; cash size does not touch the frozen bars. Also set
-# settings.daily_precision... no — minimal change only: cash + explicit settings
-# guard. Apparatus log: v1 stalled (minute resolution, 35M pts/4 days, undiagnosed);
-# v2/v3 stalled same; v4 diagnosed via "35,224,058 data points" + universe_settings
-# fix -> completed; v5 = log-cap mitigation. Prior runs consumed no bars (TRADES 0 /
-# summary unreadable); v5 segment A is the REGISTERED READING for segment A.
+# v6 (20 Oct): MARGIN-FREE WEIGHT FIX. v5's cash bump (10M) FAILED: SetHoldings(s, 0.02)
+# sizes positions as a PERCENT OF PORTFOLIO, so ~50 concurrent x 2% exhausts 100% of
+# equity regardless of cash level (log confirmed: same margin wall, log cap eaten again
+# before 2017-03). v6 lowers the weight to 0.005 (0.5%): 50 concurrent = 25% of equity,
+# order rejections structurally impossible. Ledger unaffected: per-trade EV is
+# price-based (entry/exit prices, -2x0.35% costs) — weight never enters the frozen bars.
+# Apparatus lesson registered: SetHoldings is RELATIVE sizing; margin exhaustion is a
+# ratio problem, not an absolute-cash problem. v6 segment A = the registered reading.
 #
 # FROZEN RULE (identical): US$1-10, dvol>=US$3M; EMA50>EMA200; swing leg = prior 90d
 # max-high day j, leg_low = min close of 90d ending at j; close in golden pocket
@@ -28,15 +24,14 @@ from collections import deque
 import numpy as np
 
 
-class UsTest53RsiFibV5(QCAlgorithm):
+class UsTest53RsiFibV6(QCAlgorithm):
 
     def initialize(self):
-        # Daily universe data (v4 root-cause fix — default is Minute, ~500x workload)
+        # Daily universe data (default is Minute -> ~500x workload; v4 root-cause fix)
         self.universe_settings.resolution = Resolution.Daily
         self.universe_settings.leverage = 1.0
         self.set_start_date(2014, 1, 1)   # SEGMENT A; B: 2020-07-01..2026-07-15
         self.set_end_date(2020, 6, 30)
-        # v5: large cash so SetHoldings(0.02) never hits margin limits (log-cap fix)
         self.set_cash(10_000_000)
         self.set_benchmark("SPY")
 
@@ -45,6 +40,7 @@ class UsTest53RsiFibV5(QCAlgorithm):
         self.rsi_period = 14
         self.min_price, self.max_price, self.min_dvol = 1.0, 10.0, 3e6
         self.win_len = 291
+        self.weight = 0.005   # v6: 0.5% per position; 50 concurrent = 25% equity
 
         self.add_universe(self._coarse, self._fine)
         self.set_warm_up(300, Resolution.Daily)
@@ -163,7 +159,7 @@ class UsTest53RsiFibV5(QCAlgorithm):
                 px = self.securities[s].close
                 if not px:
                     continue
-                self.set_holdings(s, 0.02)
+                self.set_holdings(s, self.weight)
                 self.exit_at[s] = self.hold_days
                 self.entry_px[s] = px
                 self.in_flight += 1
