@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-# QUANTCONNECT LEAN — US Test 5.3 QC CONFIRMATION PORT v4 (RSI div + Fib golden pocket)
+# QUANTCONNECT LEAN — US Test 5.3 QC CONFIRMATION PORT v5 (RSI div + Fib golden pocket)
 #
-# v4 (20 Oct): ROOT CAUSE FOUND from the terminated v2 run's exit log: "Processing total
-# of 35,224,058 data points" to reach 2014-01-06 (4 trading days) = ~9M points/day ->
-# the universe/equities were running at MINUTE resolution (QC default), ~500x the
-# intended daily workload. All v1/v2/v3 "stalls" were minute-data grind, not logic.
-# v4 fix: self.universe_settings.resolution = Resolution.Daily (one line, plus leverage
-# 1.0). No other changes; v3 slice-only window build retained. Registered note: no
-# prior run consumed bars (all terminated pre-trade; TRADES 0 in the v2 exit log).
-# QC-port checklist lesson: ALWAYS set universe resolution explicitly — default Minute.
-#
-# v3 (20 Oct): REMOVE self.history() ENTIRELY. Windows are built purely from daily
-# slice bars, appended one per day, INCLUDING during warm-up. Signal math
-# (_signal/_ema/_rsi_series) byte-identical to v1/v2. Universe cap 200.
+# v5 (20 Oct): LOG-CAP MITIGATION. v4 segment A ran CLEAN to completion (root cause
+# fixed: daily resolution) but the free-tier 10KB log cap was consumed by margin-error
+# spam (Insufficient buying power from late 2016 onward; 2% x ~50 concurrent = 100%
+# equity), so the TRADES/EV/YEAR/MAX_CONC summary was never written. Fix: set_cash
+# 10,000,000 (order rejections disappear; log stays quiet; summary survives the cap).
+# LEDGER UNAFFECTED: per-trade EV is price-based (entry/exit prices, -2x0.35%), not
+# portfolio-based; cash size does not touch the frozen bars. Also set
+# settings.daily_precision... no — minimal change only: cash + explicit settings
+# guard. Apparatus log: v1 stalled (minute resolution, 35M pts/4 days, undiagnosed);
+# v2/v3 stalled same; v4 diagnosed via "35,224,058 data points" + universe_settings
+# fix -> completed; v5 = log-cap mitigation. Prior runs consumed no bars (TRADES 0 /
+# summary unreadable); v5 segment A is the REGISTERED READING for segment A.
 #
 # FROZEN RULE (identical): US$1-10, dvol>=US$3M; EMA50>EMA200; swing leg = prior 90d
 # max-high day j, leg_low = min close of 90d ending at j; close in golden pocket
@@ -28,15 +28,16 @@ from collections import deque
 import numpy as np
 
 
-class UsTest53RsiFibV4(QCAlgorithm):
+class UsTest53RsiFibV5(QCAlgorithm):
 
     def initialize(self):
-        # v4: force DAILY universe/security data (QC default is Minute -> 35M points in 4 days)
+        # Daily universe data (v4 root-cause fix — default is Minute, ~500x workload)
         self.universe_settings.resolution = Resolution.Daily
         self.universe_settings.leverage = 1.0
         self.set_start_date(2014, 1, 1)   # SEGMENT A; B: 2020-07-01..2026-07-15
         self.set_end_date(2020, 6, 30)
-        self.set_cash(100000)
+        # v5: large cash so SetHoldings(0.02) never hits margin limits (log-cap fix)
+        self.set_cash(10_000_000)
         self.set_benchmark("SPY")
 
         self.hold_days = 21
@@ -46,7 +47,6 @@ class UsTest53RsiFibV4(QCAlgorithm):
         self.win_len = 291
 
         self.add_universe(self._coarse, self._fine)
-        # 300 warm-up days: fills the 291-bar windows BEFORE trading starts.
         self.set_warm_up(300, Resolution.Daily)
 
         self.exit_at = {}
@@ -54,7 +54,7 @@ class UsTest53RsiFibV4(QCAlgorithm):
         self.trades = []
         self.in_flight = 0
         self.max_conc_seen = 0
-        self.closes = {}   # symbol -> deque (oldest..latest)
+        self.closes = {}
         self.highs = {}
 
     # ---------- universe ----------
@@ -67,10 +67,9 @@ class UsTest53RsiFibV4(QCAlgorithm):
                 and c.dollar_volume >= self.min_dvol]
 
     def _fine(self, fine):
-        # NOTE: fine is not order-guaranteed; cap kept for free-tier headroom.
         return [f.symbol for f in fine][:200]
 
-    # ---------- helpers (identical math to v1/v2/v3) ----------
+    # ---------- helpers (identical math) ----------
     def _ema(self, closes, span):
         a = 2.0 / (span + 1)
         e = closes[0]
@@ -123,7 +122,6 @@ class UsTest53RsiFibV4(QCAlgorithm):
 
     # ---------- main loop ----------
     def on_data(self, slice):
-        # v3/v4: collect bars ALWAYS (incl. warm-up) — no history API anywhere.
         for s in self.active_securities.keys():
             bar = slice.get(s)
             if bar is None:
@@ -136,9 +134,8 @@ class UsTest53RsiFibV4(QCAlgorithm):
                 self.highs[s] = deque([float(bar.high)], maxlen=self.win_len)
 
         if self.is_warming_up:
-            return  # windows filling; no trading during warm-up
+            return
 
-        # --- exits first (21-day hold) ---
         for s in list(self.exit_at.keys()):
             self.exit_at[s] -= 1
             if self.exit_at[s] <= 0:
@@ -150,7 +147,6 @@ class UsTest53RsiFibV4(QCAlgorithm):
                 del self.entry_px[s]
                 self.in_flight -= 1
 
-        # --- entries: signal on cached windows ---
         for s in list(self.closes.keys()):
             if s in self.exit_at:
                 continue
@@ -158,7 +154,7 @@ class UsTest53RsiFibV4(QCAlgorithm):
                 continue
             cl = self.closes[s]
             if len(cl) < self.win_len:
-                continue  # symbol newer than 291 days in cache
+                continue
             c_arr = np.fromiter(cl, dtype=float)
             h_arr = np.fromiter(self.highs[s], dtype=float)
             if np.isnan(c_arr).any():
