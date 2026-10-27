@@ -1,0 +1,9 @@
+[stage 1] fetching Nasdaq screener list ...
+[diag] screener returned 7004 raw rows
+[diag] screener columns: ['symbol', 'name', 'lastsale', 'netchange', 'pctchange', 'volume', 'marketCap', 'country', 'ipoyear', 'industry', 'sector', 'url']
+[diag] price band US$1.0-10.0: 2116 candidates
+[stage 2] fetching history for 5 new tickers (cached: 0)
+
+[RESULT] universe: 2 tickers in data_us/
+[diag] drops: {'short_hist': 1, 'no_data': 0, 'low_dvol': 2}
+[diag] SURVIVORSHIP CAVEAT APPLIES: today-only universe snapshot (runbook section 2)
