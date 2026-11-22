@@ -9,6 +9,7 @@
 
 - **Video 1:** "Give Me 33 Minutes and You\'ll Never Place a Dumb Trade Again" — Tori Trades (Victoria Duke), youtube.com/watch?v=zai2jojP1hY
 - **Video 2:** "These are the only two trading indicators I use..." (VWAP + 9 EMA day-trade setup; Simply Options Academy marketing video), transcript pasted 22 Nov 2026. Tests 6.1–6.3 decode Video 1; Test 6.4 decodes Video 2.
+- **Video 3:** "One strategy I use every single day..." (Opening Range Breakout, 15/5/1-minute drill) — triaged 22 Nov 2026 as **class already registered (Test 5.4)**, see Source triage log below. No new Tier 6 test consumed.
 - **Taught on:** index futures / day trading venues. We test the *decodable core* on the US microcap universe, so friction is harsher here than in the source venue — that gap is itself part of the test.
 - **Third-party decode cross-checked:** app.faketrades.in/s/give-me-33-minutes... (same-rule backtest on Indian data: +0.31R expectancy, 36% win rate, negative in 4/9 years, maxDD −21%) — used to sanity-check the mechanical translation only; NOT evidence for adoption.
 
@@ -60,6 +61,18 @@ Same trades as 6.1. Arm A = opposing-trendline exit (6.1 as run). Arm B = her Op
 - **Target:** prior session swing high (the video's "low of some sort", mirrored); whichever of target / stop / 15:55-ET-flat hits first closes the trade. One position at a time per symbol.
 - **Run window:** 2016-01 → 2026-07 (LEAN-local/AlgoSeek-equivalent minute data window), 0.35%/side + 0.55% stress, frozen 4.5 universe with the 5.4–5.6 registered in-apparatus caps (universe cap, segment splits, truncation-at-cap rule declared BEFORE the run).
 - **Compute:** LEAN CLI local route per docs/RUNBOOK-5-4-5-6-LEAN-CLI.md; runs only after the 5.4 single-ticker download plumbing check passes; IBKR 1-min bulk fallback if the QC download fails.
+
+---
+
+## Source triage log
+
+**Video 3 (transcript pasted 22 Nov 2026): "one strategy I use every single day..." — Opening Range Breakout (15/5/1-minute drill, first-2-hours focus).**
+- **Triage verdict: CLASS ALREADY REGISTERED — no new test consumed.** The decodable core is Test 5.4 (laboratory registration PR #36, superseded by arkenstone PR #9 / lab repo 5.4–5.6 registration): 15-minute opening range, close-confirmed break, gap-up only, ≤2% width filter, same-day exit, QC/LEAN minute route, predicted FAIL (tombstone-completion). The video's 5-minute-close confirmation and 15-minute range high/low marking match 5.4's frozen definition line for line. Registering a near-duplicate 6.5 would violate the one-run / no-class-duplication discipline.
+- **Two deltas vs the frozen 5.4 registration, flagged for owner decision BEFORE the 5.4 run (its registration is already frozen; amending mechanics is the owner\'s call, not an agent default):**
+  1. **Retest entry:** the video enters on the pullback to the broken range level (1-minute rejection at the level), whereas 5.4 as registered enters on the confirmed close beyond the range. Note: 4.7b found breakout-entry strictly worse than nearness on the daily 52w scan — a retest-entry arm is a legitimate paired-arm option if the owner pre-registers it now.
+  2. **Fixed 1:2 take-profit:** the video targets a fixed 2R; 5.4 exits at day-end logic. A fixed-R target is cheap to add as a paired exit arm pre-run.
+- **Excluded as untestable folklore (SMC-class):** "sellers/buyers stepping in" wick reads, "price acceptance" narrative, mental-stop / hold-if-structure-unviolated management (only hard stops are testable), unspecified "key technical levels" higher-timeframe targets, low-of-day-plus-continuation discretionary targets.
+- **If owner declines both deltas:** Video 3 = source confirmation only; 5.4 runs exactly as registered.
 
 ---
 
