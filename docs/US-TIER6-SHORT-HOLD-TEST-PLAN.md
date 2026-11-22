@@ -1,7 +1,7 @@
 # US Tier 6 — Short-Hold Folklore Test Plan (Break & Retest + VWAP/9EMA + Bias Probe)
 
 **Status:** REGISTERED (bars frozen below BEFORE any code). No bars may change after the first run. One registered run per test, no gate-widening (4.2 precedent).
-**Owner decisions locked 22 Nov 2026:** market = US microcaps (frozen 4.5 universe), sequence = daily Stage 1 first, intraday only if Stage 1 passes. **Owner decisions (same day): 6.5 bias probe REGISTERED; 5.4 amended pre-run with both paired arms (see docs/US-TEST-5-4-RUN-AMENDMENT.md as pushed; body-close S/R convention stays per-test, NOT made default).**
+**Owner decisions locked 22 Nov 2026:** market = US microcaps (frozen 4.5 universe), sequence = daily Stage 1 first, intraday only if Stage 1 passes. **Owner decisions (same day): 6.5 bias probe REGISTERED; 5.4 amended pre-run with both paired arms (body-close S/R convention stays per-test, NOT made default).** **Batch status: source series CLOSED 22 Nov at 5 videos; no further 6.x registrations without new owner go.**
 
 ---
 
@@ -11,6 +11,7 @@
 - **Video 2:** "These are the only two trading indicators I use..." (VWAP + 9 EMA day-trade setup; Simply Options Academy marketing video), transcript pasted 22 Nov 2026. Tests 6.1–6.3 decode Video 1; Test 6.4 decodes Video 2.
 - **Video 3:** "One strategy I use every single day..." (Opening Range Breakout, 15/5/1-minute drill) — triaged 22 Nov 2026 as **class already registered (Test 5.4)**. Owner decision: 5.4 amended pre-run with both paired arms (retest entry + fixed 1:2 target) — see amendment doc.
 - **Video 4:** Harry Sharp interview (IQ Capital) — "story / zone / strat" intraday scalping — triaged 22 Nov 2026 as **breakout/retest family (already registered) + SMC-wrapper exclusions**. Owner decision: the two-candle bias filter REGISTERED as Test 6.5 (probe only); body-close S/R convention stays per-test.
+- **Video 5:** "Only two indicators I have ever used" — 20 SMA + 200 SMA — triaged 22 Nov 2026 as **FULLY COVERED** (200-MA regime logic = the system\'s own validated gate; all entry cores map to existing tombstones). No new test; batch CLOSED.
 - **Taught on:** index futures / day trading venues. We test the *decodable core* on the US microcap universe, so friction is harsher here than in the source venue — that gap is itself part of the test.
 - **Third-party decode cross-checked:** app.faketrades.in/s/give-me-33-minutes... (same-rule backtest on Indian data: +0.31R expectancy, 36% win rate, negative in 4/9 years, maxDD −21%) — used to sanity-check the mechanical translation only; NOT evidence for adoption.
 
@@ -58,8 +59,8 @@ Same trades as 6.1. Arm A = opposing-trendline exit (6.1 as run). Arm B = her Op
 - **Proximity gate (video rule 2):** |EMA9 − VWAP| ≤ 0.25 × ATR(14, 15m) on the signal bar ("trade only when they\'re close together").
 - **Entry A (break-retest continuation):** price crosses above VWAP, then pulls back and touches the VWAP/EMA zone from above within N=6 bars; confirmation bar closes above the prior bar high with a body ≥ 0.75×ATR(14, 15m) (the video's "momentum/engulfing" proxy); entry next bar open.
 - **Entry B (level rejection):** price sells down INTO the VWAP/EMA zone from above in an above-VWAP session; rejection proxy = lower wick ≥ 50% of bar range on ≥ 2 consecutive bars at the zone; then a bar closes above EMA9; entry on the next bar taking out the prior bar high. Entry next bar open.
-- **Stop:** below signal-side swing = min(zswing_low, min(VWAP, EMA9) − 0.25×ATR), evaluated on entry bar; exit on stop touch (intraday touch, not close — day-trade convention).
-- **Target:** prior session swing high (the video's "low of some sort", mirrored); whichever of target / stop / 15:55-ET-flat hits first closes the trade. One position at a time per symbol.
+- **Stop:** below signal-side swing = min(swing_low, min(VWAP, EMA9) − 0.25×ATR), evaluated on entry bar; exit on stop touch (intraday touch, not close — day-trade convention).
+- **Target:** prior session swing high; whichever of target / stop / 15:55-ET-flat hits first closes the trade. One position at a time per symbol.
 - **Run window:** 2016-01 → 2026-07 (LEAN-local/AlgoSeek-equivalent minute data window), 0.35%/side + 0.55% stress, frozen 4.5 universe with the 5.4–5.6 registered in-apparatus caps (universe cap, segment splits, truncation-at-cap rule declared BEFORE the run).
 - **Compute:** LEAN CLI local route per docs/RUNBOOK-5-4-5-6-LEAN-CLI.md; runs only after the 5.4 single-ticker download plumbing check passes; IBKR 1-min bulk fallback if the QC download fails.
 
@@ -70,7 +71,7 @@ Same trades as 6.1. Arm A = opposing-trendline exit (6.1 as run). Arm B = her Op
 
 **Frozen rules (long-only mirror):**
 - **Condition C(t):** daily candle of t−1 closes up AND the last completed 4h candle before the session open (09:30 ET) closes up. Sessions not meeting C are excluded from the conditional arm; the unconditional mean is computed across ALL sessions.
-- **Measurement variable:** next-session return of the frozen 4.5 universe, equal-weighted — specifically close(09:30)→close(15:55) equal-weight universe return on day t (session return, not close-to-close, to isolate the session window he claims the bias governs).
+- **Measurement variable:** next-session return of the frozen 4.5 universe, equal-weighted — close(09:30)→close(15:55) equal-weight universe return on day t (session return, not close-to-close, to isolate the session window he claims the bias governs).
 - **Data:** 4h and intraday session returns require the LEAN CLI minute route — queued behind the 5.4 single-ticker plumbing check, same as 6.4; run window 2016-01→2026-07 or the longest window the minute data supports, declared in-apparatus BEFORE the run.
 - **One run. No gate-widening. No re-runs.**
 
@@ -79,9 +80,9 @@ Same trades as 6.1. Arm A = opposing-trendline exit (6.1 as run). Arm B = her Op
 |---|---|
 | Conditioned mean session return − unconditional mean | ≥ +0.10pp |
 | Observations (sessions meeting C) | ≥ 500 (else VOID-by-feasibility) |
-| Consistency | positive conditioned−unconditional delta in BOTH halves of the window (split at midpoint) |
+| Consistency | positive delta in BOTH halves of the window (split at midpoint) |
 | Statistical | block-bootstrap 95% CI of the delta (30-day blocks) excludes 0 |
-| Friction context | report: does the delta survive 2×0.35%/side costs if traded naively? (expected NO — this contextual line is informational but must appear in the verdict) |
+| Friction context | report: does the delta survive 2×0.35%/side costs if traded naively? (expected NO — informational but mandatory in the verdict) |
 
 **If the probe reads positive:** it does NOT enter the live system; it is queued as a candidate filter-condition arm on a future registered test (which must then clear the two-stage guardrail with the filter on). If negative: bias-filter class tombstoned; Video 4 fully closed.
 
@@ -90,9 +91,18 @@ Same trades as 6.1. Arm A = opposing-trendline exit (6.1 as run). Arm B = her Op
 
 ## Source triage log
 
-**Video 3 (Opening Range Breakout, 15/5/1-minute drill):** CLASS ALREADY REGISTERED (Test 5.4) — no Tier 6 test consumed. Deltas flagged; **owner decision 22 Nov: BOTH paired arms (retest entry + fixed 1:2 target) pre-registered into 5.4 before its first run** — see the amendment registered alongside this plan (docs/US-TEST-5-4-RUN-AMENDMENT.md, file name as pushed in this PR). One-run discipline preserved: single run, arms read from the same run's fills. Excluded (SMC-class): wick reads, mental stops, discretionary targets. Registered prediction: FAIL.
+**Video 3 (Opening Range Breakout, 15/5/1-minute drill):** CLASS ALREADY REGISTERED (Test 5.4) — no Tier 6 test consumed. **Owner decision 22 Nov: BOTH paired arms (retest entry + fixed 1:2 target) pre-registered into 5.4 before its first run** (docs/US-TEST-5-4-RUN-AMENDMENT.md). One-run discipline preserved. Excluded (SMC-class): wick reads, mental stops, discretionary targets. Registered prediction: FAIL.
 
-**Video 4 (Harry Sharp, "story / zone / strat"):** Entry machinery = breakout/retest family (covered); SMC layers excluded (liquidity-grab narrative, clean/messy zones, "nipple wick" explicitly experience-based, discretionary fast-move exits, fundamental "story", staircases, gamma). **Owner decisions 22 Nov: two-candle bias filter REGISTERED as Test 6.5 (probe only, above); body-close S/R convention NOT made default (stays per-test — it remains consistent with 6.1's frozen body-close rule where used).** Claimed 70%+ win rate at ~1:1: noted as claimed only; standing rule — no adoption on claimed win rates.
+**Video 4 (Harry Sharp, "story / zone / strat"):** Entry machinery = breakout/retest family (covered); SMC layers excluded (liquidity-grab narrative, clean/messy zones, "nipple wick" explicitly experience-based, discretionary fast-move exits, fundamental "story", staircases, gamma). **Owner decisions 22 Nov: two-candle bias filter REGISTERED as Test 6.5 (probe only); body-close S/R convention NOT made default (stays per-test — consistent with 6.1\'s frozen body-close rule where used).** Claimed 70%+ win rate at ~1:1: noted as claimed only; standing rule — no adoption on claimed win rates.
+
+**Video 5 (transcript pasted 22 Nov 2026): "Only two indicators I have ever used" — 20 SMA + 200 SMA (day/swing trading; Schwab account, ~$500k/9mo claimed).**
+- **Triage verdict: FULLY COVERED — no new test consumed.** Every decodable element maps to an existing registration or tombstone:
+  - **200-MA floor/ceiling regime logic = the system\'s own already-validated gate** (SPY > SMA200 in the 4.5 gates / ES3 > SMA200 on SGX). Not folklore — this half of the video is already evidence-cleared and live. Convergence worth noting: a claimed six-figure day trader\'s "bias layer" reduces to the champion\'s regime gate.
+  - **20-MA pullback / touch-and-bounce entries** = EMA-pullback class, tombstoned both markets (Brooks EMA-pullback, 16 Oct sweep; EMA family dead via Test 3.5, gross ≈ +0.05%).
+  - **"Extension" mean-reversion reversals** = mean reversion, tombstoned (SGX support-bounce 21% win rate; deeper-dip walk-forward fail; US STREV 4.3).
+  - **"Squeeze play"** (flat 200 + rising 20 crossing, oscillation, breakout) = breakout class, tombstoned (3.1b, 5.2, 4.7b); the trader himself says it suits swing trading on daily/weekly.
+- **Excluded as untestable:** discretionary "respect" reads across 2m→daily timeframes with no frozen entry/exit/stops/targets/hold rules anywhere in the video; claimed brokerage P&L (noted as claimed only; standing rule — no adoption on claimed results).
+- **BATCH NOTE (final): Tier 6 video series CLOSED 22 Nov at 5 sources.** Series synthesis mirrors the Tier 3 / US finding from the popular-media direction: every video\'s decodable core reduces to (a) the regime gate the system already uses, (b) a short-hold class the friction wall kills, or (c) untestable SMC-style narrative. Novel decodable yield from the entire series: ONE probe (6.5) and two pre-registered 5.4 arms. The "why not something else" answer now has popular-media coverage in addition to backtest coverage: same classes, same wall. No further 6.x registrations without new owner go.
 
 
 ---
@@ -120,7 +130,7 @@ Same trades as 6.1. Arm A = opposing-trendline exit (6.1 as run). Arm B = her Op
 | Trade count | ≥ 500 (else VOID-by-feasibility) |
 | Stress @ 0.55%/side | EV > 0 (mandatory) |
 
-**Probe (6.5):** bars frozen in the 6.5 section above (delta ≥ +0.10pp, ≥500 obs, both halves positive, block-bootstrap CI excludes 0, friction-context line mandatory). Probe results NEVER enter the live system directly.
+**Probe (6.5):** bars frozen in the 6.5 section above. Probe results NEVER enter the live system directly.
 
 **Adoption bar (only after all above):** beats the live 4.5 champion regime-gated baseline EV by ≥ +0.30pp on the matched universe, else no adoption even on a pass.
 
@@ -145,4 +155,5 @@ Same trades as 6.1. Arm A = opposing-trendline exit (6.1 as run). Arm B = her Op
 5. 6.5 bias probe → LEAN CLI route, same data batch as 6.4 → single bar reading → verdict doc + PR (probe verdict; no adoption regardless)
 6. Any surviving candidate → two-stage walk-forward → QC confirmation → adoption-bar comparison vs 4.5 → owner decision
 
+**Source series CLOSED 22 Nov 2026 (5 videos). No further 6.x registrations without new owner go.**
 **2 Nov live/paper deployments are unaffected by anything in this plan until every bar above reads.**
