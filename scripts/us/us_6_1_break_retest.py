@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-US Test 6.1/6.2 â Trendline Break & Retest, DAILY (Tori Trades Video 1, mechanically decoded)
+US Test 6.1/6.2 — Trendline Break & Retest, DAILY (Tori Trades Video 1, mechanically decoded)
 Plan: docs/US-TIER6-SHORT-HOLD-TEST-PLAN.md (bars FROZEN before this code was written)
 Usage:
   python3 us_6_1_break_retest.py --data-dir data_us --spy data_us/SPY.csv \
@@ -143,7 +143,7 @@ def run(files, spy_df, start, end, cost, arm_b=False, probe=False):
                             if entry_t >= len(df): 
                                 active = None; break
                             # Exit: NEW opposing up-trendline... for the LONG mirror the
-                             # opposing" line is the rebuilt steeper UP line through the
+                            # "opposing" line is the rebuilt steeper UP line through the
                             # most recent higher lows (frozen). Exit = first daily close
                             # violating it. Arm B uses S/R take-profit instead.
                             tr = simulate_trade(df, entry_t, m, b, cost, arm_b)
@@ -218,10 +218,10 @@ def main():
     spy_df = load_csv(a.spy)
     tr = run(files, spy_df, a.start, a.end, cost, a.arm_b)
     if a.probe:
-        print(f"PROBE MODE: trades={len(tr)} on {len(files)} files â inspect before any real run")
+        print(f"PROBE MODE: trades={len(tr)} on {len(files)} files — inspect before any real run")
         return
     if tr.empty:
-        print("NO TRADES â DO NOT log a verdict; diagnose via probe first"); return
+        print("NO TRADES — DO NOT log a verdict; diagnose via probe first"); return
     ev = tr.ret_net.mean()
     yrs = tr.entry_date.str[:4]
     by_year = tr.groupby(yrs).ret_net.agg(["count", "mean"])
