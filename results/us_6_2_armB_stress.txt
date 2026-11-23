@@ -1,1 +1,23 @@
-<ÿðR
+SKIP _manifest: load error 'Date'
+trades=15578  EV=3.85%  cost/side=0.55%  arm=B
+positive_years=11/12
+               n      ev
+entry_date              
+2015         360  0.0424
+2016         373  0.0405
+2017         617  0.0623
+2018         498  0.0567
+2019         503  0.0312
+2020         677  0.0598
+2021        1186  0.0509
+2022         433 -0.0019
+2023        1843  0.0521
+2024        2655  0.0228
+2025        2880 0.0490
+2026         3553  0.0251
+
+=== BAR READING (single reading, pre-registered) ===
+EV net 0.55%: 3.85%   (bar: > +0.60%)
+positive years: 11/12   (bar: >= 6/13)
+trades: 15578   (bar: >= 150)
+
