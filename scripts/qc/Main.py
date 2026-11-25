@@ -100,6 +100,7 @@ class UsSixOneReconfirm(QCAlgorithm):
 
     def _on_symbol_bar(self, sym, bar):
         st = self.state.setdefault(sym.value, self._new_state())
+        st["sym"] = st.get("sym", sym.value)
         o, h, l, c, v = bar.open, bar.high, bar.low, bar.close, bar.close * bar.volume
         if not (o > 0 and h > 0 and l > 0 and c > 0):
             return
@@ -271,7 +272,7 @@ class UsSixOneReconfirm(QCAlgorithm):
             "exit_date": st["d"][t].isoformat(),
             "entry": pos["entry"], "exit": exit_px,
             "ret_gross": ret_gross, "ret_net": ret_gross - 2.0 * COST_PER_SIDE,
-            "arm": RUN_ARM})
+            "sym": st["sym"], "arm": RUN_ARM})
 
     def on_end_of_algorithm(self):
         # window-end flat: close any open virtual position at its last close
@@ -313,6 +314,12 @@ class UsSixOneReconfirm(QCAlgorithm):
         if tot > 0:
             self.log("CAUTION (not pass/fail): top-100 trades share of net PnL = %.1f%%" %
                      (sum(desc[:100]) / tot * 100))
+        wins = sorted(tr, key=lambda x: -x["ret_net"])[:50]
+        self.log("TOP-50 WINNERS AUDIT sym,entry_date,exit_date,entry,exit,ret_net")
+        for x in wins:
+            self.log("%s,%s,%s,%.2f,%.2f,%.2f%%" %
+                     (x["sym"], x["entry_date"], x["exit_date"], x["entry"],
+                      x["exit"], x["ret_net"] * 100))
         if DUMP_TRADES:
             self.log("entry_date,exit_date,entry,exit,ret_gross,ret_net,arm")
             for x in tr:
