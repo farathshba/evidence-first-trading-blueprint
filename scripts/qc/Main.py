@@ -60,7 +60,11 @@ class UsSixOneReconfirm(QCAlgorithm):
         return list(self.subscribed)
 
     def on_data(self, slice):
-        bars = list(slice.bars.values)
+        # QC cloud: slice.bars is a .NET DataDictionary exposing .Values (capital V).
+        # Local harness uses a plain Python dict with .values(). Support both.
+        _bars = slice.bars
+        _vals = getattr(_bars, "Values", None)
+        bars = list(_vals) if _vals is not None else list(_bars.values())
         if not bars:
             return
         for bar in bars:
