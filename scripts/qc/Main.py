@@ -37,17 +37,27 @@ class UsSixOneReconfirm(QCAlgorithm):
         self.set_end_date(2026, 10, 31)
         self.set_cash(100000)
         self.universe_settings.resolution = Resolution.DAILY
-        self.spy_symbol = self.add_equity("SPY", Resolution.DAILY).symbol
+        # CRITICAL DATA FIX (25 Nov): QC defaults to ADJUSTED (dividends+split
+        # adjusted) prices. Day-1 used split-adjusted-only closes (Yahoo 'close'
+        # column). Dividend-adjusted data erases ex-div gaps, so the Arm-A stop
+        # line almost never triggers, trades hold for years, EV explodes (R1
+        # showed +38.6%/trade). Use SPLIT_ADJUSTED to match the frozen methodology.
+        self.universe_settings.data_normalization_mode = DataNormalizationMode.SPLIT_ADJUSTED
+        self.spy_symbol = self.add_equity(
+            "SPY", Resolution.DAILY,
+            data_normalization_mode=DataNormalizationMode.SPLIT_ADJUSTED).symbol
         self.subscribed = set()
         self.spy_closes = []
         self.gate_by_date = {}
         self.state = {}
         self.trades = []
         if PROBE:
-            self.add_equity(PROBE_SYMBOL, Resolution.DAILY)
+            self.add_equity(PROBE_SYMBOL, Resolution.DAILY,
+                            data_normalization_mode=DataNormalizationMode.SPLIT_ADJUSTED)
         else:
             self.add_universe(self.coarse)
         self.log("RUN CONFIG: arm=%s cost/side=%.4f probe=%s" % (RUN_ARM, COST_PER_SIDE, PROBE))
+        self.log("DATA NORM: split-adjusted (matches Day-1 close-column convention)")
 
     def coarse(self, coarse):
         # Point-in-time superset: subscribe permanently on first qualification.
